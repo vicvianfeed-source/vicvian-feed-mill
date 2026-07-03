@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function SaleForm({ products, onSubmit, onCancel, saving }) {
-  const sellable = products.filter((p) => p.active !== false && p.product_type === "finished_good");
+  const sellable = products.filter((p) => p.active !== false && ["finished_good", "raw_material"].includes(p.product_type));
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
   const [customer, setCustomer] = useState("");

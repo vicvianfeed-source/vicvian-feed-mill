@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export default function RentalForm({ products, onSubmit, onCancel, saving }) {
-  const tools = products.filter((p) => p.active !== false && p.product_type === "rental_tool" && p.stock_quantity > 0);
+  const tools = products.filter((p) => p.active !== false && (p.product_type === "rental_tool" || p.domain === "rental_tool"));
   const [toolId, setToolId] = useState("");
   const [customer, setCustomer] = useState("");
   const [contact, setContact] = useState("");
