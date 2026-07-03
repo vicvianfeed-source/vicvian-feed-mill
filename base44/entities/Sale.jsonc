@@ -1,0 +1,48 @@
+{
+  "name": "Sale",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "feed_mill",
+        "fish_farm"
+      ]
+    },
+    "quantity": {
+      "type": "number"
+    },
+    "unit_price": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "operator_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "void"
+      ],
+      "default": "completed"
+    }
+  },
+  "required": [
+    "product_id",
+    "quantity",
+    "unit_price",
+    "total"
+  ]
+}

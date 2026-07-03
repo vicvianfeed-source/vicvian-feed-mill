@@ -1,0 +1,59 @@
+{
+  "name": "Product",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "sku": {
+      "type": "string"
+    },
+    "domain": {
+      "type": "string",
+      "enum": [
+        "feed_mill",
+        "fish_farm",
+        "rental_tool",
+        "service"
+      ]
+    },
+    "product_type": {
+      "type": "string",
+      "enum": [
+        "raw_material",
+        "finished_good",
+        "service",
+        "rental_tool"
+      ]
+    },
+    "unit": {
+      "type": "string",
+      "description": "Unit of measure e.g. kg, bag, unit, day"
+    },
+    "current_price": {
+      "type": "number",
+      "default": 0
+    },
+    "stock_quantity": {
+      "type": "number",
+      "default": 0
+    },
+    "low_stock_threshold": {
+      "type": "number",
+      "default": 0
+    },
+    "expiry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "domain",
+    "product_type"
+  ]
+}

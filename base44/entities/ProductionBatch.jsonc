@@ -1,0 +1,60 @@
+{
+  "name": "ProductionBatch",
+  "type": "object",
+  "properties": {
+    "output_product_id": {
+      "type": "string"
+    },
+    "output_product_name": {
+      "type": "string"
+    },
+    "quantity_produced": {
+      "type": "number"
+    },
+    "unit": {
+      "type": "string"
+    },
+    "materials": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "product_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "unit_cost": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "total_material_cost": {
+      "type": "number",
+      "default": 0
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "approved"
+      ],
+      "default": "pending"
+    },
+    "operator_email": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "output_product_id",
+    "quantity_produced"
+  ]
+}

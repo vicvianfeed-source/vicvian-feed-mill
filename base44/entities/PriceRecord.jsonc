@@ -1,0 +1,41 @@
+{
+  "name": "PriceRecord",
+  "type": "object",
+  "properties": {
+    "product_id": {
+      "type": "string"
+    },
+    "product_name": {
+      "type": "string"
+    },
+    "price": {
+      "type": "number"
+    },
+    "method": {
+      "type": "string",
+      "enum": [
+        "manual",
+        "formula"
+      ],
+      "default": "manual"
+    },
+    "cost_basis": {
+      "type": "number"
+    },
+    "markup_percent": {
+      "type": "number"
+    },
+    "effective_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "set_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "product_id",
+    "price",
+    "effective_date"
+  ]
+}

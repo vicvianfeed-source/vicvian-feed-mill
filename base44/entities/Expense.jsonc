@@ -1,0 +1,43 @@
+{
+  "name": "Expense",
+  "type": "object",
+  "properties": {
+    "category": {
+      "type": "string",
+      "enum": [
+        "procurement",
+        "operations",
+        "maintenance",
+        "other"
+      ]
+    },
+    "amount": {
+      "type": "number"
+    },
+    "description": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string",
+      "format": "date"
+    },
+    "payment_method": {
+      "type": "string",
+      "enum": [
+        "cash",
+        "bank_transfer",
+        "mobile_money",
+        "credit"
+      ],
+      "default": "cash"
+    },
+    "recorded_by": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "category",
+    "amount",
+    "date"
+  ]
+}

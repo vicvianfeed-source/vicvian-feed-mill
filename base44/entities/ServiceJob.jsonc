@@ -1,0 +1,44 @@
+{
+  "name": "ServiceJob",
+  "type": "object",
+  "properties": {
+    "service_id": {
+      "type": "string"
+    },
+    "service_name": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "grain_type": {
+      "type": "string"
+    },
+    "quantity_kg": {
+      "type": "number"
+    },
+    "rate_per_kg": {
+      "type": "number"
+    },
+    "total": {
+      "type": "number"
+    },
+    "operator_email": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "completed",
+        "void"
+      ],
+      "default": "completed"
+    }
+  },
+  "required": [
+    "service_id",
+    "customer_name",
+    "quantity_kg",
+    "total"
+  ]
+}

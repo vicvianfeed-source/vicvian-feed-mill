@@ -1,0 +1,52 @@
+{
+  "name": "Rental",
+  "type": "object",
+  "properties": {
+    "tool_id": {
+      "type": "string"
+    },
+    "tool_name": {
+      "type": "string"
+    },
+    "customer_name": {
+      "type": "string"
+    },
+    "customer_contact": {
+      "type": "string"
+    },
+    "start_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "rental_days": {
+      "type": "number"
+    },
+    "daily_rate": {
+      "type": "number"
+    },
+    "total_charge": {
+      "type": "number"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "returned"
+      ],
+      "default": "active"
+    },
+    "return_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "operator_email": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "tool_id",
+    "customer_name",
+    "start_date",
+    "rental_days"
+  ]
+}
