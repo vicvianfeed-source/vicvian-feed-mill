@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import MoneyInput from "@/components/common/MoneyInput";
 
 export default function PriceForm({ product, user, onSaved, onCancel }) {
   const [method, setMethod] = useState("manual");
@@ -52,14 +53,14 @@ export default function PriceForm({ product, user, onSaved, onCancel }) {
       </Tabs>
       {method === "manual" ? (
         <div className="space-y-1.5">
-          <Label>New price ({product.unit || "unit"})</Label>
-          <Input type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          <Label>New price — ₦ per {product.unit || "unit"}</Label>
+          <MoneyInput value={price} onChange={(e) => setPrice(e.target.value)} required />
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
-            <Label>Cost basis</Label>
-            <Input type="number" step="0.01" min="0" value={cost} onChange={(e) => setCost(e.target.value)} required />
+            <Label>Cost basis (₦)</Label>
+            <MoneyInput value={cost} onChange={(e) => setCost(e.target.value)} required />
           </div>
           <div className="space-y-1.5">
             <Label>Markup %</Label>

@@ -1,5 +1,5 @@
 export const fmtMoney = (n) =>
-  Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  "₦" + Number(n || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export const fmtNum = (n) => Number(n || 0).toLocaleString();
 

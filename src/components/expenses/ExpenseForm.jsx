@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MoneyInput from "@/components/common/MoneyInput";
 
 export default function ExpenseForm({ onSubmit, onCancel, saving }) {
   const [category, setCategory] = useState("operations");
@@ -36,8 +37,8 @@ export default function ExpenseForm({ onSubmit, onCancel, saving }) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>Amount</Label>
-          <Input type="number" step="0.01" min="0" value={amount} onChange={(e) => setAmount(e.target.value)} required />
+          <Label>Amount (₦)</Label>
+          <MoneyInput value={amount} onChange={(e) => setAmount(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
           <Label>Date</Label>

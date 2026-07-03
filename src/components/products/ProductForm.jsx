@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MoneyInput from "@/components/common/MoneyInput";
 
 export default function ProductForm({ product, onSave, onCancel, saving }) {
   const [form, setForm] = useState({
@@ -71,8 +72,8 @@ export default function ProductForm({ product, onSave, onCancel, saving }) {
           </Select>
         </div>
         <div className="space-y-1.5">
-          <Label>{form.product_type === "rental_tool" ? "Daily rate" : "Current price"}</Label>
-          <Input type="number" step="0.01" min="0" value={form.current_price} onChange={(e) => set("current_price", e.target.value)} />
+          <Label>{form.product_type === "rental_tool" ? "Daily rate (₦)" : "Current price (₦)"}</Label>
+          <MoneyInput value={form.current_price} onChange={(e) => set("current_price", e.target.value)} />
         </div>
         <div className="space-y-1.5">
           <Label>Stock quantity</Label>

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import MoneyInput from "@/components/common/MoneyInput";
 
 export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
   const purchasable = products.filter((p) => p.active !== false && ["raw_material", "finished_good"].includes(p.product_type));
@@ -50,8 +51,8 @@ export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
           <Input type="number" step="0.01" min="0" value={qty} onChange={(e) => setQty(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
-          <Label>Unit cost</Label>
-          <Input type="number" step="0.01" min="0" value={unitCost} onChange={(e) => setUnitCost(e.target.value)} required />
+          <Label>Unit cost (₦)</Label>
+          <MoneyInput value={unitCost} onChange={(e) => setUnitCost(e.target.value)} required />
         </div>
         <div className="col-span-2 space-y-1.5">
           <Label>Payment method</Label>
