@@ -1,0 +1,45 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "10 0 * * *",
+      "one_time_date": null,
+      "timezone": "Europe/Tallinn",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "daily_report_export",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_report": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportDailyReport",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export to Google Sheet",
+            "description": "Previous day's summary & P&L"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Daily Report Export to Google Sheets",
+  "description": "Every day just after midnight, appends the previous day's sales summary and P&L to the AgroMill Daily Reports Google Sheet."
+}
