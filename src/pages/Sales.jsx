@@ -8,7 +8,11 @@ import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Sales() {
   const { user, role } = useOutletContext();
@@ -17,6 +21,9 @@ export default function Sales() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const isAdmin = role === "admin";
 
   const load = async () => {
     const [s, p] = await Promise.all([
@@ -48,6 +55,25 @@ export default function Sales() {
     load();
   };
 
+  const handleDelete = async () => {
+    const s = deleteTarget;
+    if (!s) return;
+    setDeleting(true);
+    await base44.entities.Sale.delete(s.id);
+    const product = products.find((p) => p.id === s.product_id);
+    if (product) {
+      await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity + s.quantity });
+    }
+    await logAudit({
+      entityType: "Sale", entityId: s.id, action: "delete",
+      oldValue: { product: s.product_name, quantity: s.quantity, total: s.total },
+      description: `Deleted sale: ${s.quantity} × ${s.product_name}`,
+    });
+    setDeleting(false);
+    setDeleteTarget(null);
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -68,13 +94,14 @@ export default function Sales() {
               <TableHead className="text-right">Unit Price</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Recorded by</TableHead>
+              {isAdmin && <TableHead className="w-10"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
             ) : sales.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">No sales recorded yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">No sales recorded yet.</TableCell></TableRow>
             ) : (
               sales.map((s, i) => (
                 <TableRow key={s.id} className={i % 2 ? "bg-slate-50/50" : ""}>
@@ -85,6 +112,13 @@ export default function Sales() {
                   <TableCell className="text-right tabular-nums">{fmtMoney(s.unit_price)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(s.total)}</TableCell>
                   <TableCell className="text-xs text-slate-500">{s.operator_email}</TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(s)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
@@ -97,6 +131,22 @@ export default function Sales() {
           <SaleForm products={products} onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} canEditDate={role !== "operator"} />
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this sale?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && `${deleteTarget.quantity} × ${deleteTarget.product_name} (${fmtMoney(deleteTarget.total)}) will be permanently deleted and the stock restored.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700" disabled={deleting} onClick={handleDelete}>
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
