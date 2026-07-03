@@ -29,12 +29,12 @@ export default function Sales() {
   };
   useEffect(() => { load(); }, []);
 
-  const handleSubmit = async ({ product, quantity, customer_name, sale_date }) => {
+  const handleSubmit = async ({ product, quantity, customer_name, sale_date, unit_price }) => {
     setSaving(true);
-    const total = Math.round(product.current_price * quantity * 100) / 100;
+    const total = Math.round(unit_price * quantity * 100) / 100;
     const sale = await base44.entities.Sale.create({
       product_id: product.id, product_name: product.name, domain: product.domain,
-      quantity, unit_price: product.current_price, total, customer_name, sale_date,
+      quantity, unit_price, total, customer_name, sale_date,
       operator_email: user.email, status: "completed",
     });
     await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity - quantity });

@@ -11,22 +11,30 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
   const [qty, setQty] = useState("");
   const [customer, setCustomer] = useState("");
   const [saleDate, setSaleDate] = useState(todayStr());
+  const [price, setPrice] = useState("");
   const product = sellable.find((p) => p.id === productId);
   const quantity = parseFloat(qty) || 0;
-  const total = product ? product.current_price * quantity : 0;
+  const unitPrice = parseFloat(price) || 0;
+  const total = unitPrice * quantity;
   const overStock = product && quantity > product.stock_quantity;
+
+  const selectProduct = (id) => {
+    setProductId(id);
+    const p = sellable.find((x) => x.id === id);
+    setPrice(p ? String(p.current_price) : "");
+  };
 
   const submit = (e) => {
     e.preventDefault();
-    if (!product || quantity <= 0 || overStock) return;
-    onSubmit({ product, quantity, customer_name: customer, sale_date: saleDate });
+    if (!product || quantity <= 0 || unitPrice <= 0 || overStock) return;
+    onSubmit({ product, quantity, customer_name: customer, sale_date: saleDate, unit_price: unitPrice });
   };
 
   return (
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-1.5">
         <Label>Product</Label>
-        <Select value={productId} onValueChange={setProductId}>
+        <Select value={productId} onValueChange={selectProduct}>
           <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
           <SelectContent>
             {sellable.map((p) => (
@@ -47,6 +55,13 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
           {overStock && <p className="text-xs text-rose-600">Exceeds available stock</p>}
         </div>
         <div className="space-y-1.5">
+          <Label>Unit price (₦)</Label>
+          <Input type="number" step="0.01" min="0" value={price} onChange={(e) => setPrice(e.target.value)} required />
+          {product && unitPrice !== product.current_price && (
+            <p className="text-xs text-amber-600">List price: {fmtMoney(product.current_price)}</p>
+          )}
+        </div>
+        <div className="col-span-2 space-y-1.5">
           <Label>Customer (optional)</Label>
           <Input value={customer} onChange={(e) => setCustomer(e.target.value)} />
         </div>
@@ -56,12 +71,12 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
         </div>
       </div>
       <div className="bg-slate-50 rounded-lg p-3 flex justify-between text-sm">
-        <span className="text-slate-500">Total @ {product ? fmtMoney(product.current_price) : "—"}</span>
+        <span className="text-slate-500">Total @ {unitPrice ? fmtMoney(unitPrice) : "—"}</span>
         <span className="font-bold tabular-nums">{fmtMoney(total)}</span>
       </div>
       <div className="flex justify-end gap-2">
         <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
-        <Button type="submit" disabled={saving || !product || quantity <= 0 || overStock}>
+        <Button type="submit" disabled={saving || !product || quantity <= 0 || unitPrice <= 0 || overStock}>
           {saving ? "Recording..." : "Record sale"}
         </Button>
       </div>
