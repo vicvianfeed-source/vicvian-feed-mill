@@ -57,7 +57,7 @@ export default function Dashboard() {
     );
   }
 
-  const todaySales = data.sales.filter((s) => isToday(s.created_date) && s.status !== "void");
+  const todaySales = data.sales.filter((s) => isToday(s.sale_date || s.created_date) && s.status !== "void");
   const todayJobs = data.jobs.filter((j) => isToday(j.created_date) && j.status !== "void");
   const todayRentals = data.rentals.filter((r) => isToday(r.created_date));
   const todayExpenses = data.expenses.filter((e) => e.date === todayStr());

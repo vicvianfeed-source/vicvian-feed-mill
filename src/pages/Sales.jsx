@@ -29,12 +29,12 @@ export default function Sales() {
   };
   useEffect(() => { load(); }, []);
 
-  const handleSubmit = async ({ product, quantity, customer_name }) => {
+  const handleSubmit = async ({ product, quantity, customer_name, sale_date }) => {
     setSaving(true);
     const total = Math.round(product.current_price * quantity * 100) / 100;
     const sale = await base44.entities.Sale.create({
       product_id: product.id, product_name: product.name, domain: product.domain,
-      quantity, unit_price: product.current_price, total, customer_name,
+      quantity, unit_price: product.current_price, total, customer_name, sale_date,
       operator_email: user.email, status: "completed",
     });
     await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity - quantity });
@@ -78,7 +78,7 @@ export default function Sales() {
             ) : (
               sales.map((s, i) => (
                 <TableRow key={s.id} className={i % 2 ? "bg-slate-50/50" : ""}>
-                  <TableCell className="text-slate-500 text-xs">{new Date(s.created_date).toLocaleString()}</TableCell>
+                  <TableCell className="text-slate-500 text-xs">{s.sale_date || new Date(s.created_date).toLocaleDateString()}</TableCell>
                   <TableCell className="font-medium">{s.product_name}</TableCell>
                   <TableCell><DomainBadge domain={s.domain} /></TableCell>
                   <TableCell className="text-right tabular-nums">{s.quantity}</TableCell>

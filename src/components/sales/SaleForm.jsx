@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { fmtMoney } from "@/lib/format";
+import { fmtMoney, todayStr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,6 +10,7 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
   const [customer, setCustomer] = useState("");
+  const [saleDate, setSaleDate] = useState(todayStr());
   const product = sellable.find((p) => p.id === productId);
   const quantity = parseFloat(qty) || 0;
   const total = product ? product.current_price * quantity : 0;
@@ -18,7 +19,7 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
   const submit = (e) => {
     e.preventDefault();
     if (!product || quantity <= 0 || overStock) return;
-    onSubmit({ product, quantity, customer_name: customer });
+    onSubmit({ product, quantity, customer_name: customer, sale_date: saleDate });
   };
 
   return (
@@ -48,6 +49,10 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
         <div className="space-y-1.5">
           <Label>Customer (optional)</Label>
           <Input value={customer} onChange={(e) => setCustomer(e.target.value)} />
+        </div>
+        <div className="col-span-2 space-y-1.5">
+          <Label>Sale date</Label>
+          <Input type="date" value={saleDate} max={todayStr()} onChange={(e) => setSaleDate(e.target.value)} required />
         </div>
       </div>
       <div className="bg-slate-50 rounded-lg p-3 flex justify-between text-sm">

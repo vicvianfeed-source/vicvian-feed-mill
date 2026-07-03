@@ -37,7 +37,7 @@ export default function Reports() {
   }
 
   const inRange = (d) => { const x = (d || "").slice(0, 10); return x >= from && x <= to; };
-  const sales = data.sales.filter((s) => s.status !== "void" && inRange(s.created_date));
+  const sales = data.sales.filter((s) => s.status !== "void" && inRange(s.sale_date || s.created_date));
   const jobs = data.jobs.filter((j) => j.status !== "void" && inRange(j.created_date));
   const rentals = data.rentals.filter((r) => inRange(r.start_date));
   const expenses = data.expenses.filter((e) => inRange(e.date));

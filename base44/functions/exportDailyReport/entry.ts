@@ -85,7 +85,7 @@ Deno.serve(async (req) => {
       base44.asServiceRole.entities.Expense.list('-date', 1000),
     ]);
     const onDate = (iso) => (iso || '').slice(0, 10) === targetDate;
-    const daySales = sales.filter((s) => onDate(s.created_date) && s.status !== 'void');
+    const daySales = sales.filter((s) => onDate(s.sale_date || s.created_date) && s.status !== 'void');
     const dayJobs = jobs.filter((j) => onDate(j.created_date) && j.status !== 'void');
     const dayRentals = rentals.filter((r) => r.start_date === targetDate);
     const dayExpenses = expenses.filter((e) => e.date === targetDate);
