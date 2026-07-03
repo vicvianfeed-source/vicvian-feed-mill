@@ -49,20 +49,30 @@ export default function Reports() {
   const revenue = feedMillRev + fishFarmRev + rentalRev;
   const cogs = expenses.filter((e) => e.category === "procurement").reduce((s, x) => s + x.amount, 0);
   const opex = expenses.filter((e) => e.category !== "procurement").reduce((s, x) => s + x.amount, 0);
-  const net = revenue - cogs - opex;
+  const totalCosts = cogs + opex;
+  const net = revenue - totalCosts;
+  const isProfit = net >= 0;
 
-  const rows = [
+  const incomeRows = [
     ["Feed Mill revenue (sales + services)", feedMillRev],
     ["Fish Farm revenue", fishFarmRev],
     ["Rentals revenue", rentalRev],
-    ["Total revenue", revenue],
-    ["Cost of goods (procurement)", -cogs],
-    ["Operating expenses", -opex],
-    ["Net profit / loss", net],
+  ];
+  const costRows = [
+    ["Cost of goods (procurement)", cogs],
+    ["Operating expenses", opex],
   ];
 
   const exportCsv = () => {
-    const csv = ["Line item,Amount", ...rows.map(([l, v]) => `"${l}",${v.toFixed(2)}`)].join("\n");
+    const lines = [
+      "Section,Line item,Amount",
+      ...incomeRows.map(([l, v]) => `Income,"${l}",${v.toFixed(2)}`),
+      `Income,"Total income",${revenue.toFixed(2)}`,
+      ...costRows.map(([l, v]) => `Costs,"${l}",${(-v).toFixed(2)}`),
+      `Costs,"Total costs",${(-totalCosts).toFixed(2)}`,
+      `Result,"${isProfit ? "Net profit" : "Net loss"}",${net.toFixed(2)}`,
+    ];
+    const csv = lines.join("\n");
     const url = URL.createObjectURL(new Blob([csv], { type: "text/csv" }));
     const a = document.createElement("a");
     a.href = url;
@@ -91,10 +101,13 @@ export default function Reports() {
         </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Revenue" value={fmtMoney(revenue)} />
-        <StatCard label="COGS (Procurement)" value={fmtMoney(cogs)} accentClass="text-amber-600" />
-        <StatCard label="Operating Expenses" value={fmtMoney(opex)} accentClass="text-rose-600" />
-        <StatCard label="Net Profit" value={fmtMoney(net)} accentClass={net >= 0 ? "text-emerald-600" : "text-rose-600"} />
+        <StatCard label="Total Income" value={fmtMoney(revenue)} accentClass="text-emerald-600" />
+        <StatCard label="Total Costs" value={fmtMoney(totalCosts)} accentClass="text-rose-600" />
+        <StatCard label={isProfit ? "Net Profit" : "Net Loss"} value={fmtMoney(Math.abs(net))}
+          sub={isProfit ? "Income exceeds costs" : "Costs exceed income"}
+          accentClass={isProfit ? "text-emerald-600" : "text-rose-600"} />
+        <StatCard label="Profit Margin" value={revenue > 0 ? `${((net / revenue) * 100).toFixed(1)}%` : "—"}
+          accentClass={isProfit ? "text-emerald-600" : "text-rose-600"} />
       </div>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
@@ -105,14 +118,38 @@ export default function Reports() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {rows.map(([label, value], i) => (
-              <TableRow key={label} className={i === 3 || i === 6 ? "bg-slate-50 font-semibold" : ""}>
-                <TableCell>{label}</TableCell>
-                <TableCell className={`text-right tabular-nums ${value < 0 ? "text-rose-600" : i === 6 ? (net >= 0 ? "text-emerald-600" : "text-rose-600") : ""}`}>
-                  {fmtMoney(value)}
-                </TableCell>
+            <TableRow className="bg-emerald-50/60 hover:bg-emerald-50/60">
+              <TableCell className="font-semibold text-emerald-800" colSpan={2}>Income</TableCell>
+            </TableRow>
+            {incomeRows.map(([label, value]) => (
+              <TableRow key={label}>
+                <TableCell className="pl-8">{label}</TableCell>
+                <TableCell className="text-right tabular-nums">{fmtMoney(value)}</TableCell>
               </TableRow>
             ))}
+            <TableRow className="bg-slate-50 font-semibold">
+              <TableCell>Total income</TableCell>
+              <TableCell className="text-right tabular-nums text-emerald-600">{fmtMoney(revenue)}</TableCell>
+            </TableRow>
+            <TableRow className="bg-rose-50/60 hover:bg-rose-50/60">
+              <TableCell className="font-semibold text-rose-800" colSpan={2}>Costs & Expenses</TableCell>
+            </TableRow>
+            {costRows.map(([label, value]) => (
+              <TableRow key={label}>
+                <TableCell className="pl-8">{label}</TableCell>
+                <TableCell className="text-right tabular-nums text-rose-600">-{fmtMoney(value)}</TableCell>
+              </TableRow>
+            ))}
+            <TableRow className="bg-slate-50 font-semibold">
+              <TableCell>Total costs</TableCell>
+              <TableCell className="text-right tabular-nums text-rose-600">-{fmtMoney(totalCosts)}</TableCell>
+            </TableRow>
+            <TableRow className={`font-bold ${isProfit ? "bg-emerald-50" : "bg-rose-50"}`}>
+              <TableCell>{isProfit ? "Net Profit" : "Net Loss"}</TableCell>
+              <TableCell className={`text-right tabular-nums ${isProfit ? "text-emerald-700" : "text-rose-700"}`}>
+                {fmtMoney(Math.abs(net))}
+              </TableCell>
+            </TableRow>
           </TableBody>
         </Table>
       </div>
