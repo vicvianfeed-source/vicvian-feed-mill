@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-export default function SaleForm({ products, onSubmit, onCancel, saving }) {
+export default function SaleForm({ products, onSubmit, onCancel, saving, canEditDate = true }) {
   const sellable = products.filter((p) => p.active !== false && ["finished_good", "raw_material"].includes(p.product_type));
   const [productId, setProductId] = useState("");
   const [qty, setQty] = useState("");
@@ -67,7 +67,8 @@ export default function SaleForm({ products, onSubmit, onCancel, saving }) {
         </div>
         <div className="col-span-2 space-y-1.5">
           <Label>Sale date</Label>
-          <Input type="date" value={saleDate} max={todayStr()} onChange={(e) => setSaleDate(e.target.value)} required />
+          <Input type="date" value={saleDate} max={todayStr()} onChange={(e) => setSaleDate(e.target.value)} required disabled={!canEditDate} />
+          {!canEditDate && <p className="text-xs text-slate-400">Only admins and managers can backdate sales.</p>}
         </div>
       </div>
       <div className="bg-slate-50 rounded-lg p-3 flex justify-between text-sm">

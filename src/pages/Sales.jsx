@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus } from "lucide-react";
 
 export default function Sales() {
-  const { user } = useOutletContext();
+  const { user, role } = useOutletContext();
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -94,7 +94,7 @@ export default function Sales() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Sale</DialogTitle></DialogHeader>
-          <SaleForm products={products} onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} />
+          <SaleForm products={products} onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} canEditDate={role !== "operator"} />
         </DialogContent>
       </Dialog>
     </div>
