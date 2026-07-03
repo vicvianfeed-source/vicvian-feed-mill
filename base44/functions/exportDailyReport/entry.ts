@@ -77,44 +77,81 @@ Deno.serve(async (req) => {
       spreadsheetUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}`;
     }
 
-    // Gather the day's transactions
+    // Gather transactions
     const [sales, jobs, rentals, expenses] = await Promise.all([
       base44.asServiceRole.entities.Sale.list('-created_date', 1000),
       base44.asServiceRole.entities.ServiceJob.list('-created_date', 1000),
       base44.asServiceRole.entities.Rental.list('-created_date', 1000),
       base44.asServiceRole.entities.Expense.list('-date', 1000),
     ]);
-    const onDate = (iso) => (iso || '').slice(0, 10) === targetDate;
-    const daySales = sales.filter((s) => onDate(s.sale_date || s.created_date) && s.status !== 'void');
-    const dayJobs = jobs.filter((j) => onDate(j.created_date) && j.status !== 'void');
-    const dayRentals = rentals.filter((r) => r.start_date === targetDate);
-    const dayExpenses = expenses.filter((e) => e.date === targetDate);
 
-    const sum = (arr, f) => Math.round(arr.reduce((s, x) => s + (f(x) || 0), 0) * 100) / 100;
-    const feedMillRev = sum(daySales.filter((s) => s.domain === 'feed_mill'), (s) => s.total) + sum(dayJobs, (j) => j.total);
-    const fishFarmRev = sum(daySales.filter((s) => s.domain === 'fish_farm'), (s) => s.total);
-    const rentalRev = sum(dayRentals, (r) => r.total_charge);
-    const totalRev = Math.round((feedMillRev + fishFarmRev + rentalRev) * 100) / 100;
-    const cogs = sum(dayExpenses.filter((e) => e.category === 'procurement'), (e) => e.amount);
-    const opex = sum(dayExpenses.filter((e) => e.category !== 'procurement'), (e) => e.amount);
-    const net = Math.round((totalRev - cogs - opex) * 100) / 100;
+    // Dates to report: the target date, plus any backdated sale dates that were
+    // entered (created) on the target date but belong to an earlier day.
+    const dates = new Set([targetDate]);
+    if (!body.date) {
+      for (const s of sales) {
+        const createdOn = (s.created_date || '').slice(0, 10);
+        const saleDay = (s.sale_date || '').slice(0, 10);
+        if (createdOn === targetDate && saleDay && saleDay !== targetDate) dates.add(saleDay);
+      }
+    }
 
-    // Append one row per report tab
-    const append = async (sheetName, row) => {
-      const res = await fetch(
-        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`'${sheetName}'!A1`)}:append?valueInputOption=USER_ENTERED`,
-        { method: 'POST', headers: authHeaders, body: JSON.stringify({ values: [row] }) }
-      );
-      if (!res.ok) throw new Error(`Append to ${sheetName} failed: ${JSON.stringify(await res.json())}`);
+    const computeDay = (date) => {
+      const onDate = (iso) => (iso || '').slice(0, 10) === date;
+      const daySales = sales.filter((s) => onDate(s.sale_date || s.created_date) && s.status !== 'void');
+      const dayJobs = jobs.filter((j) => onDate(j.created_date) && j.status !== 'void');
+      const dayRentals = rentals.filter((r) => r.start_date === date);
+      const dayExpenses = expenses.filter((e) => e.date === date);
+
+      const sum = (arr, f) => Math.round(arr.reduce((s, x) => s + (f(x) || 0), 0) * 100) / 100;
+      const feedMillRev = sum(daySales.filter((s) => s.domain === 'feed_mill'), (s) => s.total) + sum(dayJobs, (j) => j.total);
+      const fishFarmRev = sum(daySales.filter((s) => s.domain === 'fish_farm'), (s) => s.total);
+      const rentalRev = sum(dayRentals, (r) => r.total_charge);
+      const totalRev = Math.round((feedMillRev + fishFarmRev + rentalRev) * 100) / 100;
+      const cogs = sum(dayExpenses.filter((e) => e.category === 'procurement'), (e) => e.amount);
+      const opex = sum(dayExpenses.filter((e) => e.category !== 'procurement'), (e) => e.amount);
+      const net = Math.round((totalRev - cogs - opex) * 100) / 100;
+      return { feedMillRev, fishFarmRev, rentalRev, totalRev, cogs, opex, net, salesCount: daySales.length, jobsCount: dayJobs.length, rentalsCount: dayRentals.length };
     };
-    await append(SUMMARY_SHEET, [targetDate, feedMillRev, fishFarmRev, rentalRev, totalRev, daySales.length, dayJobs.length, dayRentals.length]);
-    await append(PNL_SHEET, [targetDate, totalRev, cogs, opex, net]);
+
+    // Upsert a row keyed by date: update the existing row for that date, else append.
+    const upsertRow = async (sheetName, date, row) => {
+      const colRes = await fetch(
+        `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`'${sheetName}'!A:A`)}`,
+        { headers: authHeaders }
+      );
+      const colData = await colRes.json();
+      if (!colRes.ok) throw new Error(`Read ${sheetName} failed: ${JSON.stringify(colData)}`);
+      const rows = colData.values || [];
+      const idx = rows.findIndex((r) => (r[0] || '').slice(0, 10) === date);
+      if (idx >= 0) {
+        const res = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`'${sheetName}'!A${idx + 1}`)}?valueInputOption=USER_ENTERED`,
+          { method: 'PUT', headers: authHeaders, body: JSON.stringify({ values: [row] }) }
+        );
+        if (!res.ok) throw new Error(`Update ${sheetName} failed: ${JSON.stringify(await res.json())}`);
+      } else {
+        const res = await fetch(
+          `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(`'${sheetName}'!A1`)}:append?valueInputOption=USER_ENTERED`,
+          { method: 'POST', headers: authHeaders, body: JSON.stringify({ values: [row] }) }
+        );
+        if (!res.ok) throw new Error(`Append to ${sheetName} failed: ${JSON.stringify(await res.json())}`);
+      }
+    };
+
+    const reported = {};
+    for (const date of [...dates].sort()) {
+      const d = computeDay(date);
+      await upsertRow(SUMMARY_SHEET, date, [date, d.feedMillRev, d.fishFarmRev, d.rentalRev, d.totalRev, d.salesCount, d.jobsCount, d.rentalsCount]);
+      await upsertRow(PNL_SHEET, date, [date, d.totalRev, d.cogs, d.opex, d.net]);
+      reported[date] = { feedMillRev: d.feedMillRev, fishFarmRev: d.fishFarmRev, rentalRev: d.rentalRev, totalRev: d.totalRev, cogs: d.cogs, opex: d.opex, net: d.net };
+    }
 
     return Response.json({
       success: true,
-      date: targetDate,
+      dates: Object.keys(reported),
       spreadsheet_url: spreadsheetUrl,
-      summary: { feedMillRev, fishFarmRev, rentalRev, totalRev, cogs, opex, net },
+      summary: reported,
     });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
