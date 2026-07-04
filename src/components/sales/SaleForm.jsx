@@ -3,7 +3,7 @@ import { fmtMoney, todayStr } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import ProductCombobox from "@/components/sales/ProductCombobox";
 
 export default function SaleForm({ products, onSubmit, onCancel, saving, canEditDate = true }) {
   const sellable = products.filter((p) => p.active !== false && ["finished_good", "raw_material"].includes(p.product_type));
@@ -34,16 +34,7 @@ export default function SaleForm({ products, onSubmit, onCancel, saving, canEdit
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-1.5">
         <Label>Product</Label>
-        <Select value={productId} onValueChange={selectProduct}>
-          <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-          <SelectContent>
-            {sellable.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.name} — {fmtMoney(p.current_price)}/{p.unit}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <ProductCombobox products={sellable} value={productId} onSelect={selectProduct} />
         {product && (
           <p className="text-xs text-slate-500">In stock: {product.stock_quantity} {product.unit}</p>
         )}

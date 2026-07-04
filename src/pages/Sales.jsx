@@ -24,6 +24,7 @@ export default function Sales() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const isOperator = role === "operator";
 
   const load = async () => {
     const [s, p] = await Promise.all([
@@ -83,6 +84,11 @@ export default function Sales() {
         </div>
         <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Sale</Button>
       </div>
+      {isOperator ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center text-slate-400 text-sm">
+          Use the "New Sale" button to record a sale. Sales history is only visible to admins and managers.
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -125,6 +131,7 @@ export default function Sales() {
           </TableBody>
         </Table>
       </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Sale</DialogTitle></DialogHeader>
