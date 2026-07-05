@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, NavLink } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { normalizeRole } from "@/lib/permissions";
+import ThemeToggle from "@/components/ThemeToggle";
 import {
   LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
   Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot,
@@ -65,10 +66,13 @@ export default function Layout() {
       <div className="px-4 py-4 border-t border-white/10">
         <p className="text-sm text-white font-medium truncate">{user.full_name || user.email}</p>
         <p className="text-xs text-slate-400 capitalize">{role}</p>
-        <button onClick={() => base44.auth.logout()}
-          className="mt-3 flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors">
-          <LogOut className="w-3.5 h-3.5" /> Sign out
-        </button>
+        <div className="mt-3 flex items-center justify-between">
+          <button onClick={() => base44.auth.logout()}
+            className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors">
+            <LogOut className="w-3.5 h-3.5" /> Sign out
+          </button>
+          <ThemeToggle />
+        </div>
       </div>
     </div>
   );

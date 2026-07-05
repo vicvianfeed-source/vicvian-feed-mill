@@ -92,3 +92,21 @@
     @apply bg-background text-foreground font-body;
   }
 }
+
+/* Dark mode remapping for the app's light utility palette */
+.dark .bg-white { background-color: #1B212E; }
+.dark .bg-\[\#F8FAFC\] { background-color: #12161F; }
+.dark .bg-slate-50 { background-color: #161B26; }
+.dark .bg-slate-100 { background-color: #232A38; }
+.dark .bg-slate-900 { background-color: #334155; }
+.dark .hover\:bg-slate-50:hover { background-color: #232A38; }
+.dark .hover\:bg-slate-100:hover { background-color: #2A3242; }
+.dark .text-slate-900, .dark .text-slate-800 { color: #F1F5F9; }
+.dark .text-slate-700, .dark .text-slate-600 { color: #CBD5E1; }
+.dark .text-slate-500 { color: #94A3B8; }
+.dark .text-slate-400 { color: #7C8AA0; }
+.dark .border-slate-200, .dark .border-slate-100 { border-color: #2C3444; }
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]),
+.dark .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: #2C3444; }
+.dark .border-slate-200.border-t-slate-800 { border-top-color: #E2E8F0; }
+.dark .prose { color: #E2E8F0; }
