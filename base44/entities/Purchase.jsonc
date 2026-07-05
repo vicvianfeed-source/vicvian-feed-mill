@@ -14,6 +14,10 @@
     "quantity": {
       "type": "number"
     },
+    "unit": {
+      "type": "string",
+      "description": "Quantity unit e.g. kg, bag, tonne, litre, unit"
+    },
     "unit_cost": {
       "type": "number"
     },

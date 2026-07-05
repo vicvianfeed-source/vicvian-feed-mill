@@ -35,17 +35,17 @@ export default function Purchases() {
   };
   useEffect(() => { load(); }, []);
 
-  const handleSubmit = async ({ product, supplier, quantity, unit_cost, total_cost, purchase_date, payment_method }) => {
+  const handleSubmit = async ({ product, supplier, quantity, unit, unit_cost, total_cost, purchase_date, payment_method }) => {
     setSaving(true);
     const purchase = await base44.entities.Purchase.create({
       product_id: product.id, product_name: product.name, supplier,
-      quantity, unit_cost, total_cost, purchase_date, payment_method,
+      quantity, unit, unit_cost, total_cost, purchase_date, payment_method,
       recorded_by: user.email,
     });
     await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity + quantity });
     await base44.entities.Expense.create({
       category: "procurement", amount: total_cost,
-      description: `Purchase: ${quantity} ${product.unit || ""} ${product.name} from ${supplier}`,
+      description: `Purchase: ${quantity} ${unit || product.unit || ""} ${product.name} from ${supplier}`,
       date: purchase_date, payment_method, recorded_by: user.email,
     });
     await logAudit({
@@ -69,7 +69,7 @@ export default function Purchases() {
     }
     const linkedExpenses = await base44.entities.Expense.filter({
       category: "procurement", amount: p.total_cost, date: p.purchase_date,
-      description: `Purchase: ${p.quantity} ${product?.unit || ""} ${p.product_name} from ${p.supplier}`,
+      description: `Purchase: ${p.quantity} ${p.unit || product?.unit || ""} ${p.product_name} from ${p.supplier}`,
     });
     if (linkedExpenses.length > 0) {
       await base44.entities.Expense.delete(linkedExpenses[0].id);
@@ -118,7 +118,7 @@ export default function Purchases() {
                   <TableCell className="text-slate-500 text-xs">{p.purchase_date}</TableCell>
                   <TableCell className="font-medium">{p.product_name}</TableCell>
                   <TableCell>{p.supplier}</TableCell>
-                  <TableCell className="text-right tabular-nums">{p.quantity}</TableCell>
+                  <TableCell className="text-right tabular-nums">{p.quantity} {p.unit || ""}</TableCell>
                   <TableCell className="text-right tabular-nums">{fmtMoney(p.unit_cost)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(p.total_cost)}</TableCell>
                   <TableCell className="text-xs text-slate-500">{p.recorded_by}</TableCell>

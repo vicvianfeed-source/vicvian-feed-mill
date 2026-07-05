@@ -6,9 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MoneyInput from "@/components/common/MoneyInput";
 
+const UNITS = ["kg", "bag", "tonne", "litre", "crate", "unit"];
+
 export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
   const purchasable = products.filter((p) => p.active !== false && ["raw_material", "finished_good"].includes(p.product_type));
   const [productId, setProductId] = useState("");
+  const [unit, setUnit] = useState("");
   const [supplier, setSupplier] = useState("");
   const [qty, setQty] = useState("");
   const [unitCost, setUnitCost] = useState("");
@@ -21,7 +24,7 @@ export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
     e.preventDefault();
     if (!product || !supplier || total <= 0) return;
     onSubmit({
-      product, supplier, quantity: parseFloat(qty), unit_cost: parseFloat(unitCost),
+      product, supplier, quantity: parseFloat(qty), unit: unit || product.unit || "unit", unit_cost: parseFloat(unitCost),
       total_cost: Math.round(total * 100) / 100, purchase_date: date, payment_method: payMethod,
     });
   };
@@ -30,7 +33,7 @@ export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-1.5">
         <Label>Item</Label>
-        <Select value={productId} onValueChange={setProductId}>
+        <Select value={productId} onValueChange={(id) => { setProductId(id); const p = purchasable.find((x) => x.id === id); setUnit(p?.unit && UNITS.includes(p.unit) ? p.unit : ""); }}>
           <SelectTrigger><SelectValue placeholder="Select item" /></SelectTrigger>
           <SelectContent>
             {purchasable.map((p) => <SelectItem key={p.id} value={p.id}>{p.name} ({p.unit})</SelectItem>)}
@@ -47,8 +50,17 @@ export default function PurchaseForm({ products, onSubmit, onCancel, saving }) {
           <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
         </div>
         <div className="space-y-1.5">
-          <Label>Quantity {product ? `(${product.unit})` : ""}</Label>
+          <Label>Quantity</Label>
           <Input type="number" step="0.01" min="0" value={qty} onChange={(e) => setQty(e.target.value)} required />
+        </div>
+        <div className="space-y-1.5">
+          <Label>Quantity type</Label>
+          <Select value={unit} onValueChange={setUnit}>
+            <SelectTrigger><SelectValue placeholder="Select unit" /></SelectTrigger>
+            <SelectContent>
+              {UNITS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+            </SelectContent>
+          </Select>
         </div>
         <div className="space-y-1.5">
           <Label>Unit cost (₦)</Label>
