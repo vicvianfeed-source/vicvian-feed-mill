@@ -8,15 +8,21 @@ Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
 
-    // If called by a logged-in user, only admins/managers may trigger an export.
-    // When invoked by the scheduled workflow there is no user token.
+    const body = await req.json().catch(() => ({}));
+
+    // Authorization: either a logged-in admin/manager, or the scheduled
+    // workflow presenting the shared export secret. Everything else is rejected.
     let user = null;
     try { user = await base44.auth.me(); } catch (_e) { user = null; }
-    if (user && !['admin', 'manager'].includes(user.role)) {
-      return Response.json({ error: 'Forbidden' }, { status: 403 });
+    const isPrivilegedUser = user && ['admin', 'manager'].includes(user.role);
+    let isWorkflowCall = false;
+    if (!isPrivilegedUser && typeof body.secret === 'string' && body.secret.length > 0) {
+      const secretSettings = await base44.asServiceRole.entities.AppSetting.filter({ key: 'daily_report_export_secret' });
+      isWorkflowCall = !!secretSettings[0]?.value && secretSettings[0].value === body.secret;
     }
-
-    const body = await req.json().catch(() => ({}));
+    if (!isPrivilegedUser && !isWorkflowCall) {
+      return Response.json({ error: 'Unauthorized' }, { status: 401 });
+    }
     // Default: yesterday (the workflow runs just after midnight)
     let targetDate = body.date;
     if (!targetDate) {

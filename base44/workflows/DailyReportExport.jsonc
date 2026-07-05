@@ -29,7 +29,9 @@
           "call": "invoke_backend_function",
           "with": {
             "function_name": "exportDailyReport",
-            "args": {}
+            "args": {
+              "secret": "c64e19df6bdf0a385752b866acc7435b43b14565d9572e1aa8011050243957e7"
+            }
           },
           "then": "end",
           "x-base44": {
