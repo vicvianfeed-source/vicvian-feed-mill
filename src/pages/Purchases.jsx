@@ -7,15 +7,22 @@ import PurchaseForm from "@/components/purchases/PurchaseForm";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function Purchases() {
-  const { user } = useOutletContext();
+  const { user, role } = useOutletContext();
   const [purchases, setPurchases] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const isAdmin = role === "admin";
 
   const load = async () => {
     const [pu, p] = await Promise.all([
@@ -51,6 +58,32 @@ export default function Purchases() {
     load();
   };
 
+  const handleDelete = async () => {
+    const p = deleteTarget;
+    if (!p) return;
+    setDeleting(true);
+    await base44.entities.Purchase.delete(p.id);
+    const product = products.find((x) => x.id === p.product_id);
+    if (product) {
+      await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity - p.quantity });
+    }
+    const linkedExpenses = await base44.entities.Expense.filter({
+      category: "procurement", amount: p.total_cost, date: p.purchase_date,
+      description: `Purchase: ${p.quantity} ${product?.unit || ""} ${p.product_name} from ${p.supplier}`,
+    });
+    if (linkedExpenses.length > 0) {
+      await base44.entities.Expense.delete(linkedExpenses[0].id);
+    }
+    await logAudit({
+      entityType: "Purchase", entityId: p.id, action: "delete",
+      oldValue: { product: p.product_name, supplier: p.supplier, quantity: p.quantity, total_cost: p.total_cost },
+      description: `Deleted purchase: ${p.quantity} × ${p.product_name} from ${p.supplier}`,
+    });
+    setDeleting(false);
+    setDeleteTarget(null);
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -71,13 +104,14 @@ export default function Purchases() {
               <TableHead className="text-right">Unit Cost</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Recorded by</TableHead>
+              {isAdmin && <TableHead className="w-10"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
             ) : purchases.length === 0 ? (
-              <TableRow><TableCell colSpan={7} className="text-center py-8 text-slate-400">No purchases recorded yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">No purchases recorded yet.</TableCell></TableRow>
             ) : (
               purchases.map((p, i) => (
                 <TableRow key={p.id} className={i % 2 ? "bg-slate-50/50" : ""}>
@@ -88,6 +122,13 @@ export default function Purchases() {
                   <TableCell className="text-right tabular-nums">{fmtMoney(p.unit_cost)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(p.total_cost)}</TableCell>
                   <TableCell className="text-xs text-slate-500">{p.recorded_by}</TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(p)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
@@ -100,6 +141,22 @@ export default function Purchases() {
           <PurchaseForm products={products} onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} />
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this purchase?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && `${deleteTarget.quantity} × ${deleteTarget.product_name} from ${deleteTarget.supplier} (${fmtMoney(deleteTarget.total_cost)}) will be permanently deleted. Stock will be reduced and the linked procurement expense removed.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700" disabled={deleting} onClick={handleDelete}>
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
