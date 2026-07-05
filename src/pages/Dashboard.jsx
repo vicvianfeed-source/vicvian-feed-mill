@@ -19,6 +19,7 @@ const QUICK_ACTIONS = [
 export default function Dashboard() {
   const { user, role } = useOutletContext();
   const [data, setData] = useState(null);
+  const [period, setPeriod] = useState("today");
 
   useEffect(() => {
     (async () => {
@@ -57,17 +58,24 @@ export default function Dashboard() {
     );
   }
 
-  const todaySales = data.sales.filter((s) => isToday(s.sale_date || s.created_date) && s.status !== "void");
-  const todayJobs = data.jobs.filter((j) => isToday(j.created_date) && j.status !== "void");
-  const todayRentals = data.rentals.filter((r) => isToday(r.created_date));
-  const todayExpenses = data.expenses.filter((e) => e.date === todayStr());
+  const isWeek = period === "week";
+  const weekStart = addDays(todayStr(), -6);
+  const inPeriod = (iso) => {
+    const d = (iso || "").slice(0, 10);
+    return isWeek ? d >= weekStart && d <= todayStr() : isToday(iso);
+  };
 
-  const feedMillRev = todaySales.filter((s) => s.domain === "feed_mill").reduce((s, x) => s + x.total, 0)
-    + todayJobs.reduce((s, x) => s + x.total, 0);
-  const fishFarmRev = todaySales.filter((s) => s.domain === "fish_farm").reduce((s, x) => s + x.total, 0);
-  const rentalRev = todayRentals.reduce((s, x) => s + (x.total_charge || 0), 0);
+  const periodSales = data.sales.filter((s) => inPeriod(s.sale_date || s.created_date) && s.status !== "void");
+  const periodJobs = data.jobs.filter((j) => inPeriod(j.created_date) && j.status !== "void");
+  const periodRentals = data.rentals.filter((r) => inPeriod(r.created_date));
+  const periodExpenses = data.expenses.filter((e) => inPeriod(e.date));
+
+  const feedMillRev = periodSales.filter((s) => s.domain === "feed_mill").reduce((s, x) => s + x.total, 0)
+    + periodJobs.reduce((s, x) => s + x.total, 0);
+  const fishFarmRev = periodSales.filter((s) => s.domain === "fish_farm").reduce((s, x) => s + x.total, 0);
+  const rentalRev = periodRentals.reduce((s, x) => s + (x.total_charge || 0), 0);
   const totalRev = feedMillRev + fishFarmRev + rentalRev;
-  const totalExp = todayExpenses.reduce((s, x) => s + x.amount, 0);
+  const totalExp = periodExpenses.reduce((s, x) => s + x.amount, 0);
 
   const lowStock = data.products.filter((p) => p.active !== false && p.product_type !== "service"
     && p.low_stock_threshold > 0 && p.stock_quantity <= p.low_stock_threshold);
@@ -79,21 +87,34 @@ export default function Dashboard() {
     && p.expiry_date <= soon && p.stock_quantity > 0);
 
   const recent = [
-    ...todaySales.map((s) => ({ id: `s-${s.id}`, type: "Sale", desc: `${s.quantity} × ${s.product_name}`, domain: s.domain, total: s.total, by: s.operator_email })),
-    ...todayJobs.map((j) => ({ id: `j-${j.id}`, type: "Service", desc: `${j.service_name} — ${j.customer_name}`, domain: "service", total: j.total, by: j.operator_email })),
-    ...todayRentals.map((r) => ({ id: `r-${r.id}`, type: "Rental", desc: `${r.tool_name} — ${r.customer_name}`, domain: "rental_tool", total: r.total_charge, by: r.operator_email })),
-  ];
+    ...periodSales.map((s) => ({ id: `s-${s.id}`, type: "Sale", desc: `${s.quantity} × ${s.product_name}`, domain: s.domain, total: s.total, date: (s.sale_date || s.created_date || "").slice(0, 10) })),
+    ...periodJobs.map((j) => ({ id: `j-${j.id}`, type: "Service", desc: `${j.service_name} — ${j.customer_name}`, domain: "service", total: j.total, date: (j.created_date || "").slice(0, 10) })),
+    ...periodRentals.map((r) => ({ id: `r-${r.id}`, type: "Rental", desc: `${r.tool_name} — ${r.customer_name}`, domain: "rental_tool", total: r.total_charge, date: (r.created_date || "").slice(0, 10) })),
+  ].sort((a, b) => (a.date < b.date ? 1 : -1));
+
+  const periodLabel = isWeek ? "This Week's" : "Today's";
+  const netLabel = isWeek ? "Net This Week" : "Net Today";
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Today's operations at a glance</p>
+      <div className="flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+          <p className="text-sm text-slate-500 mt-1">{isWeek ? "Last 7 days of operations at a glance" : "Today's operations at a glance"}</p>
+        </div>
+        <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+          {[["today", "Today"], ["week", "This Week"]].map(([val, lbl]) => (
+            <button key={val} onClick={() => setPeriod(val)}
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${period === val ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+              {lbl}
+            </button>
+          ))}
+        </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Today's Revenue" value={fmtMoney(totalRev)} accentClass="text-slate-900" />
-        <StatCard label="Today's Expenses" value={fmtMoney(totalExp)} accentClass="text-rose-600" />
-        <StatCard label="Net Today" value={fmtMoney(totalRev - totalExp)}
+        <StatCard label={`${periodLabel} Revenue`} value={fmtMoney(totalRev)} accentClass="text-slate-900" />
+        <StatCard label={`${periodLabel} Expenses`} value={fmtMoney(totalExp)} accentClass="text-rose-600" />
+        <StatCard label={netLabel} value={fmtMoney(totalRev - totalExp)}
           accentClass={totalRev - totalExp >= 0 ? "text-emerald-600" : "text-rose-600"} />
         <StatCard label="Active Rentals" value={data.rentals.filter((r) => r.status === "active").length}
           sub={`${overdueRentals.length} overdue`} accentClass="text-indigo-600" />
@@ -103,14 +124,15 @@ export default function Dashboard() {
         <AlertsPanel lowStock={lowStock} overdueRentals={overdueRentals} expiring={expiring} />
       </div>
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">Today's Transactions</h3>
+        <h3 className="text-sm font-semibold text-slate-700 mb-3">{periodLabel} Transactions</h3>
         {recent.length === 0 ? (
-          <p className="text-sm text-slate-400 py-4">No transactions recorded today yet.</p>
+          <p className="text-sm text-slate-400 py-4">No transactions recorded {isWeek ? "this week" : "today"} yet.</p>
         ) : (
           <div className="divide-y divide-slate-100">
             {recent.map((t) => (
               <div key={t.id} className="flex items-center gap-3 py-2.5">
                 <span className="text-xs font-medium text-slate-500 w-14">{t.type}</span>
+                {isWeek && <span className="text-xs text-slate-400 tabular-nums w-20">{t.date}</span>}
                 <span className="flex-1 text-sm text-slate-800 truncate">{t.desc}</span>
                 <DomainBadge domain={t.domain} />
                 <span className="text-sm font-semibold tabular-nums w-24 text-right">{fmtMoney(t.total)}</span>
