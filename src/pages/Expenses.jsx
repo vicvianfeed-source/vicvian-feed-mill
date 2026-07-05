@@ -8,7 +8,11 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const CAT_CLS = {
   procurement: "bg-indigo-100 text-indigo-700",
@@ -18,12 +22,15 @@ const CAT_CLS = {
 };
 
 export default function Expenses() {
-  const { user } = useOutletContext();
+  const { user, role } = useOutletContext();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState("all");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const isAdmin = role === "admin";
 
   const load = async () => {
     setExpenses(await base44.entities.Expense.list("-date", 200));
@@ -41,6 +48,21 @@ export default function Expenses() {
     });
     setSaving(false);
     setOpen(false);
+    load();
+  };
+
+  const handleDelete = async () => {
+    const e = deleteTarget;
+    if (!e) return;
+    setDeleting(true);
+    await base44.entities.Expense.delete(e.id);
+    await logAudit({
+      entityType: "Expense", entityId: e.id, action: "delete",
+      oldValue: { category: e.category, amount: e.amount },
+      description: `Deleted expense: ${e.category} — ${fmtMoney(e.amount)}`,
+    });
+    setDeleting(false);
+    setDeleteTarget(null);
     load();
   };
 
@@ -79,13 +101,14 @@ export default function Expenses() {
               <TableHead>Payment</TableHead>
               <TableHead className="text-right">Amount</TableHead>
               <TableHead>Recorded by</TableHead>
+              {isAdmin && <TableHead className="w-10"></TableHead>}
             </TableRow>
           </TableHeader>
           <TableBody>
             {loading ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
             ) : filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={6} className="text-center py-8 text-slate-400">No expenses recorded.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 7 : 6} className="text-center py-8 text-slate-400">No expenses recorded.</TableCell></TableRow>
             ) : (
               filtered.map((e, i) => (
                 <TableRow key={e.id} className={i % 2 ? "bg-slate-50/50" : ""}>
@@ -99,6 +122,13 @@ export default function Expenses() {
                   <TableCell className="text-xs text-slate-500 capitalize">{(e.payment_method || "").replace("_", " ")}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(e.amount)}</TableCell>
                   <TableCell className="text-xs text-slate-500">{e.recorded_by}</TableCell>
+                  {isAdmin && (
+                    <TableCell>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(e)}>
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TableCell>
+                  )}
                 </TableRow>
               ))
             )}
@@ -111,6 +141,22 @@ export default function Expenses() {
           <ExpenseForm onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} />
         </DialogContent>
       </Dialog>
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this expense?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {deleteTarget && `${deleteTarget.category} expense of ${fmtMoney(deleteTarget.amount)} (${deleteTarget.date}) will be permanently deleted.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction className="bg-rose-600 hover:bg-rose-700" disabled={deleting} onClick={handleDelete}>
+              {deleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
