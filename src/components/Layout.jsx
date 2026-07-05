@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { normalizeRole } from "@/lib/permissions";
 import {
   LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
-  Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X,
+  Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot,
 } from "lucide-react";
 
 const NAV = [
@@ -21,6 +21,7 @@ const NAV = [
   { label: "Reports", path: "/reports", icon: BarChart3, roles: ["admin", "manager"] },
   { label: "Audit Log", path: "/audit", icon: ScrollText, roles: ["admin"] },
   { label: "Team", path: "/team", icon: Users, roles: ["admin"] },
+  { label: "Assistant", path: "/assistant", icon: Bot, roles: ["admin", "manager", "operator"] },
 ];
 
 export default function Layout() {

@@ -14,6 +14,7 @@ export const PAGE_ROLES = {
   reports: ["admin", "manager"],
   audit: ["admin"],
   team: ["admin"],
+  assistant: ALL,
 };
 
 export const normalizeRole = (role) =>
