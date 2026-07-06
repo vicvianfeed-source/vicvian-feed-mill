@@ -78,7 +78,12 @@ export default function Layout() {
   );
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="min-h-screen bg-[#F8FAFC] relative">
+      <div
+        className="fixed inset-0 z-0 bg-cover bg-center pointer-events-none"
+        style={{ backgroundImage: "url('https://media.base44.com/images/public/6a47e78a9afaebf80383e337/6e7005f6a_generated_image.png')" }}
+      />
+      <div className="fixed inset-0 z-0 pointer-events-none bg-[#F8FAFC]/85 dark:bg-[#12161F]/90" />
       <aside className="hidden md:block fixed inset-y-0 left-0 w-60 z-30">{sidebar}</aside>
       {open && (
         <div className="md:hidden fixed inset-0 z-40">
@@ -90,7 +95,7 @@ export default function Layout() {
         <h1 className="font-bold">AgroMill IMS</h1>
         <button onClick={() => setOpen(!open)}>{open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
       </div>
-      <main className="md:pl-60">
+      <main className="md:pl-60 relative z-10">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8">
           <Outlet context={{ user, role }} />
         </div>
