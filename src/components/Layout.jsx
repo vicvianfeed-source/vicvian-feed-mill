@@ -3,6 +3,8 @@ import { Outlet, NavLink } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { normalizeRole } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
+import BottomTabBar from "@/components/BottomTabBar";
+import AccountSettings from "@/components/AccountSettings";
 import {
   LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
   Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot,
@@ -66,11 +68,12 @@ export default function Layout() {
       <div className="px-4 py-4 border-t border-white/10">
         <p className="text-sm text-white font-medium truncate">{user.full_name || user.email}</p>
         <p className="text-xs text-slate-400 capitalize">{role}</p>
-        <div className="mt-3 flex items-center justify-between">
+        <div className="mt-3 flex items-center justify-between gap-2 flex-wrap">
           <button onClick={() => base44.auth.logout()}
             className="flex items-center gap-2 text-xs text-slate-400 hover:text-white transition-colors">
             <LogOut className="w-3.5 h-3.5" /> Sign out
           </button>
+          <AccountSettings user={user} />
           <ThemeToggle />
         </div>
       </div>
@@ -91,15 +94,17 @@ export default function Layout() {
           <aside className="absolute inset-y-0 left-0 w-60">{sidebar}</aside>
         </div>
       )}
-      <div className="md:hidden sticky top-0 z-30 bg-[#1A1F2E] text-white flex items-center justify-between px-4 py-3">
+      <div className="md:hidden sticky top-0 z-30 bg-[#1A1F2E] text-white flex items-center justify-between px-4 py-3"
+        style={{ paddingTop: "calc(env(safe-area-inset-top) + 0.75rem)" }}>
         <h1 className="font-bold">AgroMill IMS</h1>
         <button onClick={() => setOpen(!open)}>{open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
       </div>
-      <main className="md:pl-60 relative z-10">
+      <main className="md:pl-60 relative z-10 pb-20 md:pb-0">
         <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8">
           <Outlet context={{ user, role }} />
         </div>
       </main>
+      <BottomTabBar />
     </div>
   );
 }

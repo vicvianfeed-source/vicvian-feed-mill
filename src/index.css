@@ -91,6 +91,16 @@
   body {
     @apply bg-background text-foreground font-body;
   }
+
+  html, body {
+    overscroll-behavior: none;
+  }
+
+  button, nav a, header, [role="tab"], [role="menuitem"] {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
 }
 
 /* Dark mode remapping for the app's light utility palette */
