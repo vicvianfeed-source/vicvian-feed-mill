@@ -12,11 +12,7 @@ export default function AccountSettings({ user }) {
 
   const requestDeletion = async () => {
     setStatus("sending");
-    await base44.integrations.Core.SendEmail({
-      to: user.email,
-      subject: "AgroMill IMS — Account Deletion Request Received",
-      body: `Hello ${user.full_name || user.email},\n\nWe received your request to delete your AgroMill IMS account (${user.email}). Your account and associated personal data will be reviewed and removed by an administrator.\n\nIf you did not make this request, please contact your administrator immediately.`,
-    });
+    await base44.functions.invoke("requestAccountDeletion", {});
     setStatus("sent");
   };
 
