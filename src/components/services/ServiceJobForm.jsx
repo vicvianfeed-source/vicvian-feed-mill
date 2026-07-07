@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import NativeSelect from "@/components/common/NativeSelect";
 
 export default function ServiceJobForm({ products, onSubmit, onCancel, saving }) {
   const services = products.filter((p) => p.active !== false && p.product_type === "service");
@@ -25,14 +26,8 @@ export default function ServiceJobForm({ products, onSubmit, onCancel, saving })
     <form onSubmit={submit} className="space-y-4">
       <div className="space-y-1.5">
         <Label>Service</Label>
-        <Select value={serviceId} onValueChange={setServiceId}>
-          <SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger>
-          <SelectContent>
-            {services.map((p) => (
-              <SelectItem key={p.id} value={p.id}>{p.name} — {fmtMoney(p.current_price)}/kg</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <NativeSelect value={serviceId} onChange={setServiceId} placeholder="Select service"
+          options={services.map((p) => ({ value: p.id, label: `${p.name} — ${fmtMoney(p.current_price)}/kg` }))} />
       </div>
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">

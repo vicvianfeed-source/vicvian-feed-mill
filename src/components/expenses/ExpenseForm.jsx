@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import MoneyInput from "@/components/common/MoneyInput";
+import NativeSelect from "@/components/common/NativeSelect";
 
 export default function ExpenseForm({ onSubmit, onCancel, saving }) {
   const [category, setCategory] = useState("operations");
@@ -26,15 +26,13 @@ export default function ExpenseForm({ onSubmit, onCancel, saving }) {
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label>Category</Label>
-          <Select value={category} onValueChange={setCategory}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="procurement">Procurement</SelectItem>
-              <SelectItem value="operations">Operations</SelectItem>
-              <SelectItem value="maintenance">Maintenance</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <NativeSelect value={category} onChange={setCategory} placeholder="Select category"
+            options={[
+              { value: "procurement", label: "Procurement" },
+              { value: "operations", label: "Operations" },
+              { value: "maintenance", label: "Maintenance" },
+              { value: "other", label: "Other" },
+            ]} />
         </div>
         <div className="space-y-1.5">
           <Label>Amount (₦)</Label>
@@ -46,15 +44,13 @@ export default function ExpenseForm({ onSubmit, onCancel, saving }) {
         </div>
         <div className="space-y-1.5">
           <Label>Payment method</Label>
-          <Select value={payMethod} onValueChange={setPayMethod}>
-            <SelectTrigger><SelectValue /></SelectTrigger>
-            <SelectContent>
-              <SelectItem value="cash">Cash</SelectItem>
-              <SelectItem value="bank_transfer">Bank Transfer</SelectItem>
-              <SelectItem value="mobile_money">Mobile Money</SelectItem>
-              <SelectItem value="credit">Credit</SelectItem>
-            </SelectContent>
-          </Select>
+          <NativeSelect value={payMethod} onChange={setPayMethod} placeholder="Select method"
+            options={[
+              { value: "cash", label: "Cash" },
+              { value: "bank_transfer", label: "Bank Transfer" },
+              { value: "mobile_money", label: "Mobile Money" },
+              { value: "credit", label: "Credit" },
+            ]} />
         </div>
       </div>
       <div className="space-y-1.5">
