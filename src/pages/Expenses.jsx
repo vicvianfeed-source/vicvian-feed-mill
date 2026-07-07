@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
+import ExpenseCard from "@/components/expenses/ExpenseCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -31,6 +33,7 @@ export default function Expenses() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const isMobile = useIsMobile();
 
   const load = async () => {
     setExpenses(await base44.entities.Expense.list("-date", 200));
@@ -91,6 +94,19 @@ export default function Expenses() {
         </Select>
         <p className="text-sm text-slate-500">Total: <span className="font-semibold text-slate-900 tabular-nums">{fmtMoney(total)}</span></p>
       </div>
+      {isMobile ? (
+        <div className="space-y-3">
+          {loading ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">No expenses recorded.</p>
+          ) : (
+            filtered.map((e) => (
+              <ExpenseCard key={e.id} expense={e} catCls={CAT_CLS[e.category] || CAT_CLS.other} isAdmin={isAdmin} onDelete={() => setDeleteTarget(e)} />
+            ))
+          )}
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -135,6 +151,7 @@ export default function Expenses() {
           </TableBody>
         </Table>
       </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Expense</DialogTitle></DialogHeader>

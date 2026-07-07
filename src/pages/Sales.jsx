@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
 import SaleForm from "@/components/sales/SaleForm";
+import SaleCard from "@/components/sales/SaleCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -25,6 +27,7 @@ export default function Sales() {
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
   const isOperator = role === "operator";
+  const isMobile = useIsMobile();
 
   const load = async () => {
     const [s, p] = await Promise.all([
@@ -88,6 +91,18 @@ export default function Sales() {
       {isOperator ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center text-slate-400 text-sm">
           Use the "New Sale" button to record a sale. Sales history is only visible to admins and managers.
+        </div>
+      ) : isMobile ? (
+        <div className="space-y-3">
+          {loading ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+          ) : sales.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">No sales recorded yet.</p>
+          ) : (
+            sales.map((s) => (
+              <SaleCard key={s.id} sale={s} isAdmin={isAdmin} onDelete={() => setDeleteTarget(s)} />
+            ))
+          )}
         </div>
       ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">

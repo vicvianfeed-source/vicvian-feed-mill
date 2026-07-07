@@ -5,6 +5,8 @@ import { logAudit } from "@/lib/audit";
 import { fmtNum, addDays, todayStr } from "@/lib/format";
 import DomainBadge from "@/components/common/DomainBadge";
 import StatusBadge from "@/components/common/StatusBadge";
+import InventoryCard from "@/components/inventory/InventoryCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -22,6 +24,7 @@ export default function Inventory() {
   const [adjusting, setAdjusting] = useState(null);
   const [newQty, setNewQty] = useState("");
   const [reason, setReason] = useState("");
+  const isMobile = useIsMobile();
 
   const load = async () => {
     setProducts(await base44.entities.Product.list("-created_date", 500));
@@ -70,6 +73,20 @@ export default function Inventory() {
           <SelectItem value="rental_tool">Rental Tools</SelectItem>
         </SelectContent>
       </Select>
+      {isMobile ? (
+        <div className="space-y-3">
+          {loading ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+          ) : filtered.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">No products found.</p>
+          ) : (
+            filtered.map((p) => (
+              <InventoryCard key={p.id} product={p} typeLabel={TYPE_LABEL[p.product_type]} status={stockStatus(p)}
+                canAdjust={canAdjust} onAdjust={() => { setAdjusting(p); setNewQty(String(p.stock_quantity)); }} />
+            ))
+          )}
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -113,6 +130,7 @@ export default function Inventory() {
           </TableBody>
         </Table>
       </div>
+      )}
       <Dialog open={!!adjusting} onOpenChange={(v) => !v && setAdjusting(null)}>
         <DialogContent>
           <DialogHeader><DialogTitle>Adjust Stock — {adjusting?.name}</DialogTitle></DialogHeader>

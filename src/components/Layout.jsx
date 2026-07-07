@@ -5,6 +5,8 @@ import { normalizeRole } from "@/lib/permissions";
 import ThemeToggle from "@/components/ThemeToggle";
 import BottomTabBar from "@/components/BottomTabBar";
 import AccountSettings from "@/components/AccountSettings";
+import PageTransition from "@/components/PageTransition";
+import PullToRefresh from "@/components/PullToRefresh";
 import {
   LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
   Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot,
@@ -100,9 +102,11 @@ export default function Layout() {
         <button onClick={() => setOpen(!open)}>{open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}</button>
       </div>
       <main className="md:pl-60 relative z-10 pb-20 md:pb-0">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8">
-          <Outlet context={{ user, role }} />
-        </div>
+        <PullToRefresh>
+          <div className="max-w-6xl mx-auto px-4 md:px-8 py-6 md:py-8">
+            <PageTransition context={{ user, role }} />
+          </div>
+        </PullToRefresh>
       </main>
       <BottomTabBar />
     </div>

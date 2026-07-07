@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
 import ServiceJobForm from "@/components/services/ServiceJobForm";
+import ServiceJobCard from "@/components/services/ServiceJobCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -16,6 +18,7 @@ export default function Services() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile();
 
   const load = async () => {
     const [j, p] = await Promise.all([
@@ -55,6 +58,17 @@ export default function Services() {
         </div>
         <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> Log Service Job</Button>
       </div>
+      {isMobile ? (
+        <div className="space-y-3">
+          {loading ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+          ) : jobs.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">No service jobs logged yet.</p>
+          ) : (
+            jobs.map((j) => <ServiceJobCard key={j.id} job={j} />)
+          )}
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -89,6 +103,7 @@ export default function Services() {
           </TableBody>
         </Table>
       </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Log Service Job</DialogTitle></DialogHeader>

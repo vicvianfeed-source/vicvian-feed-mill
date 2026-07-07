@@ -4,6 +4,8 @@ import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
 import BatchForm from "@/components/production/BatchForm";
+import BatchCard from "@/components/production/BatchCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 import StatusBadge from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -17,6 +19,7 @@ export default function Production() {
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const isMobile = useIsMobile();
 
   const load = async () => {
     const [b, p] = await Promise.all([
@@ -72,6 +75,19 @@ export default function Production() {
         </div>
         <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Batch</Button>
       </div>
+      {isMobile ? (
+        <div className="space-y-3">
+          {loading ? (
+            <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
+          ) : batches.length === 0 ? (
+            <p className="text-center py-8 text-slate-400 text-sm">No production batches yet.</p>
+          ) : (
+            batches.map((b) => (
+              <BatchCard key={b.id} batch={b} canApprove={canApprove} onApprove={() => approve(b)} />
+            ))
+          )}
+        </div>
+      ) : (
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <Table>
           <TableHeader>
@@ -116,6 +132,7 @@ export default function Production() {
           </TableBody>
         </Table>
       </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>New Production Batch</DialogTitle></DialogHeader>
