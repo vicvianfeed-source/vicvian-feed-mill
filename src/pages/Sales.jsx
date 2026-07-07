@@ -11,7 +11,8 @@ import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Printer } from "lucide-react";
+import { printReceipt } from "@/components/sales/receiptPrint";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -113,7 +114,7 @@ export default function Sales() {
             <p className="text-center py-8 text-slate-400 text-sm">No sales recorded yet.</p>
           ) : (
             sales.map((s) => (
-              <SaleCard key={s.id} sale={s} isAdmin={isAdmin} onDelete={() => setDeleteTarget(s)} operatorName={resolveName(s.operator_email)} />
+              <SaleCard key={s.id} sale={s} isAdmin={isAdmin} onDelete={() => setDeleteTarget(s)} operatorName={resolveName(s.operator_email)} onPrint={() => printReceipt(s, { operatorName: resolveName(s.operator_email) })} />
             ))
           )}
         </div>
@@ -129,6 +130,7 @@ export default function Sales() {
               <TableHead className="text-right">Unit Price</TableHead>
               <TableHead className="text-right">Total</TableHead>
               <TableHead>Recorded by</TableHead>
+              <TableHead className="w-10"></TableHead>
               {isAdmin && <TableHead className="w-10"></TableHead>}
             </TableRow>
           </TableHeader>
@@ -136,7 +138,7 @@ export default function Sales() {
             {loading ? (
               <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
             ) : sales.length === 0 ? (
-              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">No sales recorded yet.</TableCell></TableRow>
+              <TableRow><TableCell colSpan={isAdmin ? 9 : 8} className="text-center py-8 text-slate-400">No sales recorded yet.</TableCell></TableRow>
             ) : (
               sales.map((s, i) => (
                 <TableRow key={s.id} className={i % 2 ? "bg-slate-50/50" : ""}>
@@ -147,6 +149,11 @@ export default function Sales() {
                   <TableCell className="text-right tabular-nums">{fmtMoney(s.unit_price)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(s.total)}</TableCell>
                   <TableCell className="text-xs text-slate-500">{resolveName(s.operator_email)}</TableCell>
+                  <TableCell>
+                    <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-slate-700" onClick={() => printReceipt(s, { operatorName: resolveName(s.operator_email) })}>
+                      <Printer className="w-4 h-4" />
+                    </Button>
+                  </TableCell>
                   {isAdmin && (
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(s)}>

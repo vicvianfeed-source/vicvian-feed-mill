@@ -2,9 +2,9 @@ import React from "react";
 import { fmtMoney } from "@/lib/format";
 import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
-import { Trash2 } from "lucide-react";
+import { Trash2, Printer } from "lucide-react";
 
-export default function SaleCard({ sale, isAdmin, onDelete, operatorName }) {
+export default function SaleCard({ sale, isAdmin, onDelete, operatorName, onPrint }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
@@ -21,11 +21,18 @@ export default function SaleCard({ sale, isAdmin, onDelete, operatorName }) {
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
         <p className="text-xs text-slate-400 truncate">{operatorName || sale.operator_email}</p>
-        {isAdmin && (
-          <Button variant="ghost" size="sm" className="h-9 text-rose-600" onClick={onDelete}>
-            <Trash2 className="w-4 h-4 mr-1" /> Delete
-          </Button>
-        )}
+        <div className="flex items-center gap-1">
+          {onPrint && (
+            <Button variant="ghost" size="sm" className="h-9 text-slate-500" onClick={onPrint}>
+              <Printer className="w-4 h-4" />
+            </Button>
+          )}
+          {isAdmin && (
+            <Button variant="ghost" size="sm" className="h-9 text-rose-600" onClick={onDelete}>
+              <Trash2 className="w-4 h-4 mr-1" /> Delete
+            </Button>
+          )}
+        </div>
       </div>
     </div>
   );
