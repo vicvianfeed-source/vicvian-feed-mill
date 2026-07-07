@@ -56,7 +56,7 @@ export default function Assistant() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-5" style={{ height: "calc(100vh - 8rem)" }}>
+    <div className="flex flex-col lg:flex-row gap-5" style={{ height: "calc(100dvh - 9rem)" }}>
       <div className="lg:w-64 shrink-0 flex flex-col gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Team Assistant</h1>
@@ -69,7 +69,7 @@ export default function Assistant() {
           className="flex items-center gap-2 text-sm font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2 hover:bg-emerald-100 transition-colors">
           <MessageCircle className="w-4 h-4" /> Connect on WhatsApp
         </a>
-        <div className="flex-1 overflow-y-auto space-y-1 min-h-[80px]">
+        <div className="flex-1 overflow-y-auto space-y-1 min-h-[80px] max-h-32 lg:max-h-none">
           {conversations.map((c) => (
             <button key={c.id} onClick={() => setActiveId(c.id)}
               className={`w-full text-left px-3 py-2 rounded-lg text-sm truncate ${

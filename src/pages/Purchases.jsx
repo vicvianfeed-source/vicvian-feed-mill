@@ -86,7 +86,7 @@ export default function Purchases() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Purchases</h1>
           <p className="text-sm text-slate-500 mt-1">Procurement & raw material receipts</p>
