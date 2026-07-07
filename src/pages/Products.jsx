@@ -13,7 +13,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export default function Products() {
-  const { role } = useOutletContext();
+  const { user, role } = useOutletContext();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
@@ -28,6 +28,7 @@ export default function Products() {
 
   if (!canAccess(role, "products")) return <AccessDenied />;
   const isAdmin = role === "admin";
+  const canAddProduct = isAdmin || (role === "manager" && user.email === "olajumade7@gmail.com");
 
   const handleSave = async (data) => {
     setSaving(true);
@@ -69,7 +70,7 @@ export default function Products() {
           <h1 className="text-2xl font-bold text-slate-900">Product Catalog</h1>
           <p className="text-sm text-slate-500 mt-1">Products, services, and rental tools</p>
         </div>
-        {isAdmin && (
+        {canAddProduct && (
           <Button onClick={() => { setEditing(null); setOpen(true); }}>
             <Plus className="w-4 h-4 mr-1" /> New Product
           </Button>
