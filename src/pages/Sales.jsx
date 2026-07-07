@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
@@ -21,7 +21,11 @@ export default function Sales() {
   const [sales, setSales] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const open = location.pathname.endsWith("/new");
+  const openForm = () => navigate("/sales/new");
+  const closeForm = () => navigate("/sales", { replace: true });
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
@@ -44,6 +48,12 @@ export default function Sales() {
   const handleSubmit = async ({ product, quantity, customer_name, sale_date, unit_price }) => {
     setSaving(true);
     const total = Math.round(unit_price * quantity * 100) / 100;
+    const temp = {
+      id: `temp-${Date.now()}`, product_id: product.id, product_name: product.name, domain: product.domain,
+      quantity, unit_price, total, customer_name, sale_date,
+      operator_email: user.email, status: "completed", created_date: new Date().toISOString(),
+    };
+    setSales((prev) => [temp, ...prev]);
     const sale = await base44.entities.Sale.create({
       product_id: product.id, product_name: product.name, domain: product.domain,
       quantity, unit_price, total, customer_name, sale_date,
@@ -56,7 +66,7 @@ export default function Sales() {
       description: `Sale: ${quantity} × ${product.name}`,
     });
     setSaving(false);
-    setOpen(false);
+    closeForm();
     load();
   };
 
@@ -86,7 +96,7 @@ export default function Sales() {
           <h1 className="text-2xl font-bold text-slate-900">Sales</h1>
           <p className="text-sm text-slate-500 mt-1">Feed mill & fish farm product sales</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> New Sale</Button>
+        <Button onClick={openForm}><Plus className="w-4 h-4 mr-1" /> New Sale</Button>
       </div>
       {isOperator ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-10 text-center text-slate-400 text-sm">
@@ -148,10 +158,10 @@ export default function Sales() {
         </Table>
       </div>
       )}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => !v && closeForm()}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Sale</DialogTitle></DialogHeader>
-          <SaleForm products={products} onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} canEditDate={role !== "operator"} />
+          <SaleForm products={products} onSubmit={handleSubmit} onCancel={closeForm} saving={saving} canEditDate={role !== "operator"} />
         </DialogContent>
       </Dialog>
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>

@@ -34,6 +34,12 @@ export default function Services() {
   const handleSubmit = async ({ service, customer_name, grain_type, quantity_kg }) => {
     setSaving(true);
     const total = Math.round(service.current_price * quantity_kg * 100) / 100;
+    const temp = {
+      id: `temp-${Date.now()}`, service_id: service.id, service_name: service.name, customer_name, grain_type,
+      quantity_kg, rate_per_kg: service.current_price, total,
+      operator_email: user.email, status: "completed", created_date: new Date().toISOString(),
+    };
+    setJobs((prev) => [temp, ...prev]);
     const job = await base44.entities.ServiceJob.create({
       service_id: service.id, service_name: service.name, customer_name, grain_type,
       quantity_kg, rate_per_kg: service.current_price, total,

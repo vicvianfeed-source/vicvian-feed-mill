@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { fmtMoney } from "@/lib/format";
@@ -27,7 +27,11 @@ export default function Expenses() {
   const { user, role } = useOutletContext();
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const open = location.pathname.endsWith("/new");
+  const openForm = () => navigate("/expenses/new");
+  const closeForm = () => navigate("/expenses", { replace: true });
   const [saving, setSaving] = useState(false);
   const [filter, setFilter] = useState("all");
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -43,6 +47,8 @@ export default function Expenses() {
 
   const handleSubmit = async (data) => {
     setSaving(true);
+    const temp = { id: `temp-${Date.now()}`, ...data, recorded_by: user.email, created_date: new Date().toISOString() };
+    setExpenses((prev) => [temp, ...prev]);
     const exp = await base44.entities.Expense.create({ ...data, recorded_by: user.email });
     await logAudit({
       entityType: "Expense", entityId: exp.id, action: "create",
@@ -50,7 +56,7 @@ export default function Expenses() {
       description: `Expense: ${data.category} — ${fmtMoney(data.amount)}`,
     });
     setSaving(false);
-    setOpen(false);
+    closeForm();
     load();
   };
 
@@ -79,7 +85,7 @@ export default function Expenses() {
           <h1 className="text-2xl font-bold text-slate-900">Expenses</h1>
           <p className="text-sm text-slate-500 mt-1">Business expense tracking</p>
         </div>
-        <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> Record Expense</Button>
+        <Button onClick={openForm}><Plus className="w-4 h-4 mr-1" /> Record Expense</Button>
       </div>
       <div className="flex items-center gap-3 flex-wrap">
         <Select value={filter} onValueChange={setFilter}>
@@ -152,10 +158,10 @@ export default function Expenses() {
         </Table>
       </div>
       )}
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog open={open} onOpenChange={(v) => !v && closeForm()}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Expense</DialogTitle></DialogHeader>
-          <ExpenseForm onSubmit={handleSubmit} onCancel={() => setOpen(false)} saving={saving} />
+          <ExpenseForm onSubmit={handleSubmit} onCancel={closeForm} saving={saving} />
         </DialogContent>
       </Dialog>
       <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>

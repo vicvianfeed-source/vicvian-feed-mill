@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext, useNavigate, useLocation } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { logAudit } from "@/lib/audit";
 import { canAccess } from "@/lib/permissions";
@@ -17,7 +17,14 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(null);
-  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isNew = location.pathname.endsWith("/new");
+  const open = isNew || !!editing;
+  const closeForm = () => {
+    if (isNew) navigate("/products", { replace: true });
+    setEditing(null);
+  };
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -48,8 +55,7 @@ export default function Products() {
       });
     }
     setSaving(false);
-    setOpen(false);
-    setEditing(null);
+    closeForm();
     load();
   };
 
@@ -71,7 +77,7 @@ export default function Products() {
           <p className="text-sm text-slate-500 mt-1">Products, services, and rental tools</p>
         </div>
         {canAddProduct && (
-          <Button onClick={() => { setEditing(null); setOpen(true); }}>
+          <Button onClick={() => navigate("/products/new")}>
             <Plus className="w-4 h-4 mr-1" /> New Product
           </Button>
         )}
@@ -109,7 +115,7 @@ export default function Products() {
                   {isAdmin && (
                     <TableCell>
                       <div className="flex justify-end gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => { setEditing(p); setOpen(true); }}>
+                        <Button size="icon" variant="ghost" onClick={() => setEditing(p)}>
                           <Pencil className="w-3.5 h-3.5" />
                         </Button>
                         <Button size="icon" variant="ghost" className="text-rose-500 hover:text-rose-600" onClick={() => handleDelete(p)}>
@@ -124,10 +130,10 @@ export default function Products() {
           </TableBody>
         </Table>
       </div>
-      <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) setEditing(null); }}>
+      <Dialog open={open} onOpenChange={(v) => !v && closeForm()}>
         <DialogContent className="max-w-lg">
           <DialogHeader><DialogTitle>{editing ? "Edit Product" : "New Product"}</DialogTitle></DialogHeader>
-          <ProductForm product={editing} onSave={handleSave} onCancel={() => { setOpen(false); setEditing(null); }} saving={saving} />
+          <ProductForm product={editing} onSave={handleSave} onCancel={closeForm} saving={saving} />
         </DialogContent>
       </Dialog>
     </div>

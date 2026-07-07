@@ -34,6 +34,12 @@ export default function Production() {
 
   const handleSubmit = async ({ output, quantity_produced, materials, total_material_cost }) => {
     setSaving(true);
+    const temp = {
+      id: `temp-${Date.now()}`, output_product_id: output.id, output_product_name: output.name,
+      quantity_produced, unit: output.unit, materials, total_material_cost,
+      status: "pending", operator_email: user.email, created_date: new Date().toISOString(),
+    };
+    setBatches((prev) => [temp, ...prev]);
     const batch = await base44.entities.ProductionBatch.create({
       output_product_id: output.id, output_product_name: output.name,
       quantity_produced, unit: output.unit, materials, total_material_cost,
