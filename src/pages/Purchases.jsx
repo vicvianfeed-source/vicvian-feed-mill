@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Plus, Trash2 } from "lucide-react";
+import { useUserNameMap } from "@/hooks/use-user-names";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
@@ -23,6 +24,8 @@ export default function Purchases() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const { resolveName } = useUserNameMap();
+  const recorderName = user.full_name || user.email;
 
   const load = async () => {
     const [pu, p] = await Promise.all([
@@ -40,13 +43,13 @@ export default function Purchases() {
     const purchase = await base44.entities.Purchase.create({
       product_id: product.id, product_name: product.name, supplier,
       quantity, unit, unit_cost, total_cost, purchase_date, payment_method,
-      recorded_by: user.email,
+      recorded_by: recorderName,
     });
     await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity + quantity });
     await base44.entities.Expense.create({
       category: "procurement", amount: total_cost,
       description: `Purchase: ${quantity} ${unit || product.unit || ""} ${product.name} from ${supplier}`,
-      date: purchase_date, payment_method, recorded_by: user.email,
+      date: purchase_date, payment_method, recorded_by: recorderName,
     });
     await logAudit({
       entityType: "Purchase", entityId: purchase.id, action: "create",
@@ -121,7 +124,7 @@ export default function Purchases() {
                   <TableCell className="text-right tabular-nums">{p.quantity} {p.unit || ""}</TableCell>
                   <TableCell className="text-right tabular-nums">{fmtMoney(p.unit_cost)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(p.total_cost)}</TableCell>
-                  <TableCell className="text-xs text-slate-500">{p.recorded_by}</TableCell>
+                  <TableCell className="text-xs text-slate-500">{resolveName(p.recorded_by)}</TableCell>
                   {isAdmin && (
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(p)}>

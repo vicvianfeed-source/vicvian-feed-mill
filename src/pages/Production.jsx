@@ -14,6 +14,7 @@ import { Plus, CheckCircle } from "lucide-react";
 
 export default function Production() {
   const { user, role } = useOutletContext();
+  const recorderName = user.full_name || user.email;
   const [batches, setBatches] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,13 +38,13 @@ export default function Production() {
     const temp = {
       id: `temp-${Date.now()}`, output_product_id: output.id, output_product_name: output.name,
       quantity_produced, unit: output.unit, materials, total_material_cost,
-      status: "pending", operator_email: user.email, created_date: new Date().toISOString(),
+      status: "pending", operator_email: recorderName, created_date: new Date().toISOString(),
     };
     setBatches((prev) => [temp, ...prev]);
     const batch = await base44.entities.ProductionBatch.create({
       output_product_id: output.id, output_product_name: output.name,
       quantity_produced, unit: output.unit, materials, total_material_cost,
-      status: "pending", operator_email: user.email,
+      status: "pending", operator_email: recorderName,
     });
     for (const m of materials) {
       const prod = products.find((p) => p.id === m.product_id);
@@ -61,7 +62,7 @@ export default function Production() {
   };
 
   const approve = async (batch) => {
-    await base44.entities.ProductionBatch.update(batch.id, { status: "approved", approved_by: user.email });
+    await base44.entities.ProductionBatch.update(batch.id, { status: "approved", approved_by: recorderName });
     await logAudit({
       entityType: "ProductionBatch", entityId: batch.id, action: "approve",
       oldValue: { status: "pending" }, newValue: { status: "approved" },

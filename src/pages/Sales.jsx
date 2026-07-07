@@ -6,6 +6,7 @@ import { fmtMoney } from "@/lib/format";
 import SaleForm from "@/components/sales/SaleForm";
 import SaleCard from "@/components/sales/SaleCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserNameMap } from "@/hooks/use-user-names";
 import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -32,6 +33,8 @@ export default function Sales() {
   const isAdmin = role === "admin";
   const isOperator = role === "operator";
   const isMobile = useIsMobile();
+  const { resolveName } = useUserNameMap();
+  const recorderName = user.full_name || user.email;
 
   const load = async () => {
     const [s, p] = await Promise.all([
@@ -51,13 +54,13 @@ export default function Sales() {
     const temp = {
       id: `temp-${Date.now()}`, product_id: product.id, product_name: product.name, domain: product.domain,
       quantity, unit_price, total, customer_name, sale_date,
-      operator_email: user.email, status: "completed", created_date: new Date().toISOString(),
+      operator_email: recorderName, status: "completed", created_date: new Date().toISOString(),
     };
     setSales((prev) => [temp, ...prev]);
     const sale = await base44.entities.Sale.create({
       product_id: product.id, product_name: product.name, domain: product.domain,
       quantity, unit_price, total, customer_name, sale_date,
-      operator_email: user.email, status: "completed",
+      operator_email: recorderName, status: "completed",
     });
     await base44.entities.Product.update(product.id, { stock_quantity: product.stock_quantity - quantity });
     await logAudit({
@@ -110,7 +113,7 @@ export default function Sales() {
             <p className="text-center py-8 text-slate-400 text-sm">No sales recorded yet.</p>
           ) : (
             sales.map((s) => (
-              <SaleCard key={s.id} sale={s} isAdmin={isAdmin} onDelete={() => setDeleteTarget(s)} />
+              <SaleCard key={s.id} sale={s} isAdmin={isAdmin} onDelete={() => setDeleteTarget(s)} operatorName={resolveName(s.operator_email)} />
             ))
           )}
         </div>
@@ -143,7 +146,7 @@ export default function Sales() {
                   <TableCell className="text-right tabular-nums">{s.quantity}</TableCell>
                   <TableCell className="text-right tabular-nums">{fmtMoney(s.unit_price)}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(s.total)}</TableCell>
-                  <TableCell className="text-xs text-slate-500">{s.operator_email}</TableCell>
+                  <TableCell className="text-xs text-slate-500">{resolveName(s.operator_email)}</TableCell>
                   {isAdmin && (
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(s)}>

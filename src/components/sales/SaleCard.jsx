@@ -4,7 +4,7 @@ import DomainBadge from "@/components/common/DomainBadge";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
-export default function SaleCard({ sale, isAdmin, onDelete }) {
+export default function SaleCard({ sale, isAdmin, onDelete, operatorName }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
@@ -20,7 +20,7 @@ export default function SaleCard({ sale, isAdmin, onDelete }) {
         <div><p className="text-xs text-slate-400">Total</p><p className="tabular-nums font-semibold text-slate-900">{fmtMoney(sale.total)}</p></div>
       </div>
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <p className="text-xs text-slate-400 truncate">{sale.operator_email}</p>
+        <p className="text-xs text-slate-400 truncate">{operatorName || sale.operator_email}</p>
         {isAdmin && (
           <Button variant="ghost" size="sm" className="h-9 text-rose-600" onClick={onDelete}>
             <Trash2 className="w-4 h-4 mr-1" /> Delete

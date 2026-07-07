@@ -3,7 +3,7 @@ import { fmtMoney } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { Trash2 } from "lucide-react";
 
-export default function ExpenseCard({ expense, catCls, isAdmin, onDelete }) {
+export default function ExpenseCard({ expense, catCls, isAdmin, onDelete, recordedBy }) {
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4 space-y-2">
       <div className="flex items-start justify-between gap-2">
@@ -18,7 +18,7 @@ export default function ExpenseCard({ expense, catCls, isAdmin, onDelete }) {
       {expense.description && <p className="text-sm text-slate-600">{expense.description}</p>}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
         <p className="text-xs text-slate-400 truncate">
-          <span className="capitalize">{(expense.payment_method || "").replace("_", " ")}</span> · {expense.recorded_by}
+          <span className="capitalize">{(expense.payment_method || "").replace("_", " ")}</span> · {recordedBy || expense.recorded_by}
         </p>
         {isAdmin && (
           <Button variant="ghost" size="sm" className="h-9 text-rose-600" onClick={onDelete}>

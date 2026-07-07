@@ -6,6 +6,7 @@ import { fmtMoney } from "@/lib/format";
 import ExpenseForm from "@/components/expenses/ExpenseForm";
 import ExpenseCard from "@/components/expenses/ExpenseCard";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useUserNameMap } from "@/hooks/use-user-names";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -38,6 +39,8 @@ export default function Expenses() {
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
   const isMobile = useIsMobile();
+  const { resolveName } = useUserNameMap();
+  const recorderName = user.full_name || user.email;
 
   const load = async () => {
     setExpenses(await base44.entities.Expense.list("-date", 200));
@@ -47,9 +50,9 @@ export default function Expenses() {
 
   const handleSubmit = async (data) => {
     setSaving(true);
-    const temp = { id: `temp-${Date.now()}`, ...data, recorded_by: user.email, created_date: new Date().toISOString() };
+    const temp = { id: `temp-${Date.now()}`, ...data, recorded_by: recorderName, created_date: new Date().toISOString() };
     setExpenses((prev) => [temp, ...prev]);
-    const exp = await base44.entities.Expense.create({ ...data, recorded_by: user.email });
+    const exp = await base44.entities.Expense.create({ ...data, recorded_by: recorderName });
     await logAudit({
       entityType: "Expense", entityId: exp.id, action: "create",
       newValue: { category: data.category, amount: data.amount },
@@ -108,7 +111,7 @@ export default function Expenses() {
             <p className="text-center py-8 text-slate-400 text-sm">No expenses recorded.</p>
           ) : (
             filtered.map((e) => (
-              <ExpenseCard key={e.id} expense={e} catCls={CAT_CLS[e.category] || CAT_CLS.other} isAdmin={isAdmin} onDelete={() => setDeleteTarget(e)} />
+              <ExpenseCard key={e.id} expense={e} catCls={CAT_CLS[e.category] || CAT_CLS.other} isAdmin={isAdmin} onDelete={() => setDeleteTarget(e)} recordedBy={resolveName(e.recorded_by)} />
             ))
           )}
         </div>
@@ -143,7 +146,7 @@ export default function Expenses() {
                   <TableCell className="max-w-xs truncate">{e.description || "—"}</TableCell>
                   <TableCell className="text-xs text-slate-500 capitalize">{(e.payment_method || "").replace("_", " ")}</TableCell>
                   <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(e.amount)}</TableCell>
-                  <TableCell className="text-xs text-slate-500">{e.recorded_by}</TableCell>
+                  <TableCell className="text-xs text-slate-500">{resolveName(e.recorded_by)}</TableCell>
                   {isAdmin && (
                     <TableCell>
                       <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(e)}>

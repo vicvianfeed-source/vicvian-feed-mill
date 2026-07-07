@@ -13,6 +13,7 @@ import { Plus } from "lucide-react";
 
 export default function Services() {
   const { user } = useOutletContext();
+  const recorderName = user.full_name || user.email;
   const [jobs, setJobs] = useState([]);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,13 +38,13 @@ export default function Services() {
     const temp = {
       id: `temp-${Date.now()}`, service_id: service.id, service_name: service.name, customer_name, grain_type,
       quantity_kg, rate_per_kg: service.current_price, total,
-      operator_email: user.email, status: "completed", created_date: new Date().toISOString(),
+      operator_email: recorderName, status: "completed", created_date: new Date().toISOString(),
     };
     setJobs((prev) => [temp, ...prev]);
     const job = await base44.entities.ServiceJob.create({
       service_id: service.id, service_name: service.name, customer_name, grain_type,
       quantity_kg, rate_per_kg: service.current_price, total,
-      operator_email: user.email, status: "completed",
+      operator_email: recorderName, status: "completed",
     });
     await logAudit({
       entityType: "ServiceJob", entityId: job.id, action: "create",
