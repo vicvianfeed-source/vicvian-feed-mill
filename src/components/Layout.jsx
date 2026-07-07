@@ -10,7 +10,7 @@ import PageTransition from "@/components/PageTransition";
 import PullToRefresh from "@/components/PullToRefresh";
 import {
   LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
-  Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot,
+  Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot, ClipboardList,
 } from "lucide-react";
 
 const NAV = [
@@ -25,6 +25,7 @@ const NAV = [
   { label: "Products", path: "/products", icon: Package, roles: ["admin", "manager"] },
   { label: "Pricing", path: "/pricing", icon: Tags, roles: ["admin", "manager"] },
   { label: "Reports", path: "/reports", icon: BarChart3, roles: ["admin", "manager"] },
+  { label: "Orders", path: "/orders", icon: ClipboardList, roles: ["admin", "manager"] },
   { label: "Audit Log", path: "/audit", icon: ScrollText, roles: ["admin"] },
   { label: "Team", path: "/team", icon: Users, roles: ["admin"] },
   { label: "Assistant", path: "/assistant", icon: Bot, roles: ["admin", "manager", "operator"] },
