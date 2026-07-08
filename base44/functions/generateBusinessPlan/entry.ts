@@ -67,9 +67,21 @@ Deno.serve(async (req) => {
       ? ((customerStats['Walk-in']?.revenue || customerStats['walk-in']?.revenue || 0) / totalRevenue * 100).toFixed(1)
       : '0';
 
+    const FISH_FARM_PROJECTIONS = {
+      currentStock: 12700,
+      mortalityRate: 0.08,
+      survivingFish: Math.round(12700 * (1 - 0.08)),
+      targetWeightKg: 0.75,
+      salePricePerKg: 2800,
+      monthsToSale: 8,
+      projectedRevenue: Math.round(12700 * (1 - 0.08) * 0.75 * 2800),
+      projectedRevenueFormatted: '₦' + Math.round(12700 * (1 - 0.08) * 0.75 * 2800).toLocaleString(),
+    };
+
     const businessData = {
       businessName: "Vicvian Feed Mill",
       currency: "Nigerian Naira (₦)",
+      fishFarmProjections: FISH_FARM_PROJECTIONS,
       summary: {
         totalRevenue, totalExpenses, purchaseCosts,
         netProfit: totalRevenue - totalExpenses - purchaseCosts,
@@ -94,6 +106,15 @@ CRITICAL REQUIREMENT: The business plan MUST have SUSTAINABILITY entrenched into
 - Resource sharing (labor, transport, storage, energy)
 
 Address the CURRENT FINANCIAL SITUATION using the actual numbers. Include a clear TURNAROUND STRATEGY if the business is loss-making.
+
+FISH FARM PROJECTIONS (CRITICAL — incorporate deeply into the Fish Farm segment, Financial Plan, and Implementation Roadmap):
+- Current stock: 12,700 fishes (post-fingerlings and juveniles)
+- Projected mortality rate: 8% → 1,016 fish lost, 11,684 surviving fish reaching sale
+- Sales timeline: Fish will be ready for sale 8 months from procurement
+- Target harvest weight: 0.75 kg (3/4 kg) per fish
+- Sale price: ₦2,800 per kg
+- Projected total fish farm revenue at harvest: ${FISH_FARM_PROJECTIONS.projectedRevenueFormatted} (11,684 fish × 0.75 kg × ₦2,800/kg)
+- Use these figures in all financial projections, cash flow forecasts, and the turnaround strategy as a major upcoming revenue stream that offsets current losses.
 
 OPERATIONAL DATA:
 ${JSON.stringify(businessData, null, 2)}
