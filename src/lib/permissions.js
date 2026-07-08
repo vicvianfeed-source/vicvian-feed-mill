@@ -15,6 +15,7 @@ export const PAGE_ROLES = {
   audit: ["admin"],
   team: ["admin"],
   orders: ["admin", "manager"],
+  business_plan: ["admin", "manager"],
   assistant: ALL,
 };
 
