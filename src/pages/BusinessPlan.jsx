@@ -30,7 +30,8 @@ export default function BusinessPlan() {
 
   useEffect(() => { generate(); }, []);
 
-  if (role !== "admin" && role !== "manager") {
+  const ALLOWED_EMAILS = ["vicvianfeed@gmail.com", "contactarkbridge@gmail.com"];
+  if (!ALLOWED_EMAILS.includes(user?.email)) {
     return <AccessDenied />;
   }
 

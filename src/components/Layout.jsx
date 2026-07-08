@@ -26,7 +26,7 @@ const NAV = [
   { label: "Pricing", path: "/pricing", icon: Tags, roles: ["admin", "manager"] },
   { label: "Reports", path: "/reports", icon: BarChart3, roles: ["admin", "manager"] },
   { label: "Orders", path: "/orders", icon: ClipboardList, roles: ["admin", "manager"] },
-  { label: "Business Plan", path: "/business-plan", icon: FileText, roles: ["admin", "manager"] },
+  { label: "Business Plan", path: "/business-plan", icon: FileText, roles: ["admin", "manager"], emails: ["vicvianfeed@gmail.com", "contactarkbridge@gmail.com"] },
   { label: "Audit Log", path: "/audit", icon: ScrollText, roles: ["admin"] },
   { label: "Team", path: "/team", icon: Users, roles: ["admin"] },
   { label: "Assistant", path: "/assistant", icon: Bot, roles: ["admin", "manager", "operator"] },
@@ -49,7 +49,7 @@ export default function Layout() {
   }
 
   const role = normalizeRole(user.role);
-  const items = NAV.filter((n) => n.roles.includes(role));
+  const items = NAV.filter((n) => n.roles.includes(role) && (!n.emails || n.emails.includes(user.email)));
 
   const sidebar = (
     <div className="flex flex-col h-full bg-[#1A1F2E] text-slate-300">
