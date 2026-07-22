@@ -16,6 +16,15 @@ const QUICK_ACTIONS = [
   { label: "Record Expense", path: "/expenses", icon: Receipt, cls: "text-rose-600 bg-rose-50" },
 ];
 
+const BG_GIF = "https://media.giphy.com/media/uf3jumi0zzUv6/giphy.gif";
+const bgStyle = {
+  backgroundImage: `url(${BG_GIF})`,
+  backgroundSize: "cover",
+  backgroundPosition: "center",
+  backgroundAttachment: "fixed",
+};
+const overlayCls = "absolute inset-0 bg-white/70 dark:bg-slate-900/70";
+
 export default function Dashboard() {
   const { user, role } = useOutletContext();
   const [data, setData] = useState(null);
@@ -40,19 +49,22 @@ export default function Dashboard() {
 
   if (role === "operator") {
     return (
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">Welcome, {user.full_name?.split(" ")[0] || "Operator"}</h1>
-        <p className="text-sm text-slate-500 mt-1">What would you like to record today?</p>
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
-          {QUICK_ACTIONS.map((a) => (
-            <Link key={a.path} to={a.path}
-              className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${a.cls}`}>
-                <a.icon className="w-5 h-5" />
-              </div>
-              <p className="mt-3 font-semibold text-slate-800 text-sm">{a.label}</p>
-            </Link>
-          ))}
+      <div className="relative min-h-screen -m-4 sm:-m-6 p-4 sm:p-6" style={bgStyle}>
+        <div className={overlayCls} />
+        <div className="relative z-10 space-y-6">
+          <h1 className="text-2xl font-bold text-slate-900">Welcome, {user.full_name?.split(" ")[0] || "Operator"}</h1>
+          <p className="text-sm text-slate-500 mt-1">What would you like to record today?</p>
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+            {QUICK_ACTIONS.map((a) => (
+              <Link key={a.path} to={a.path}
+                className="bg-white rounded-xl border border-slate-200 shadow-sm p-5 hover:shadow-md transition-shadow">
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${a.cls}`}>
+                  <a.icon className="w-5 h-5" />
+                </div>
+                <p className="mt-3 font-semibold text-slate-800 text-sm">{a.label}</p>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -96,50 +108,53 @@ export default function Dashboard() {
   const netLabel = isWeek ? "Net This Week" : "Net Today";
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
-          <p className="text-sm text-slate-500 mt-1">{isWeek ? "Last 7 days of operations at a glance" : "Today's operations at a glance"}</p>
-        </div>
-        <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
-          {[["today", "Today"], ["week", "This Week"]].map(([val, lbl]) => (
-            <button key={val} onClick={() => setPeriod(val)}
-              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${period === val ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
-              {lbl}
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label={`${periodLabel} Revenue`} value={fmtMoney(totalRev)} accentClass="text-slate-900" />
-        <StatCard label={`${periodLabel} Expenses`} value={fmtMoney(totalExp)} accentClass="text-rose-600" />
-        <StatCard label={netLabel} value={fmtMoney(totalRev - totalExp)}
-          accentClass={totalRev - totalExp >= 0 ? "text-emerald-600" : "text-rose-600"} />
-        <StatCard label="Active Rentals" value={data.rentals.filter((r) => r.status === "active").length}
-          sub={`${overdueRentals.length} overdue`} accentClass="text-indigo-600" />
-      </div>
-      <div className="grid lg:grid-cols-2 gap-6">
-        <RevenueChart feedMill={feedMillRev} fishFarm={fishFarmRev} rentals={rentalRev} />
-        <AlertsPanel lowStock={lowStock} overdueRentals={overdueRentals} expiring={expiring} />
-      </div>
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
-        <h3 className="text-sm font-semibold text-slate-700 mb-3">{periodLabel} Transactions</h3>
-        {recent.length === 0 ? (
-          <p className="text-sm text-slate-400 py-4">No transactions recorded {isWeek ? "this week" : "today"} yet.</p>
-        ) : (
-          <div className="divide-y divide-slate-100">
-            {recent.map((t) => (
-              <div key={t.id} className="flex items-center gap-3 py-2.5">
-                <span className="text-xs font-medium text-slate-500 w-14">{t.type}</span>
-                {isWeek && <span className="text-xs text-slate-400 tabular-nums w-20">{t.date}</span>}
-                <span className="flex-1 text-sm text-slate-800 truncate">{t.desc}</span>
-                <DomainBadge domain={t.domain} />
-                <span className="text-sm font-semibold tabular-nums w-24 text-right">{fmtMoney(t.total)}</span>
-              </div>
+    <div className="relative min-h-screen -m-4 sm:-m-6 p-4 sm:p-6" style={bgStyle}>
+      <div className={overlayCls} />
+      <div className="relative z-10 space-y-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
+            <p className="text-sm text-slate-500 mt-1">{isWeek ? "Last 7 days of operations at a glance" : "Today's operations at a glance"}</p>
+          </div>
+          <div className="inline-flex rounded-lg border border-slate-200 bg-white p-1 shadow-sm">
+            {[["today", "Today"], ["week", "This Week"]].map(([val, lbl]) => (
+              <button key={val} onClick={() => setPeriod(val)}
+                className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${period === val ? "bg-slate-900 text-white" : "text-slate-600 hover:bg-slate-100"}`}>
+                {lbl}
+              </button>
             ))}
           </div>
-        )}
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label={`${periodLabel} Revenue`} value={fmtMoney(totalRev)} accentClass="text-slate-900" />
+          <StatCard label={`${periodLabel} Expenses`} value={fmtMoney(totalExp)} accentClass="text-rose-600" />
+          <StatCard label={netLabel} value={fmtMoney(totalRev - totalExp)}
+            accentClass={totalRev - totalExp >= 0 ? "text-emerald-600" : "text-rose-600"} />
+          <StatCard label="Active Rentals" value={data.rentals.filter((r) => r.status === "active").length}
+            sub={`${overdueRentals.length} overdue`} accentClass="text-indigo-600" />
+        </div>
+        <div className="grid lg:grid-cols-2 gap-6">
+          <RevenueChart feedMill={feedMillRev} fishFarm={fishFarmRev} rentals={rentalRev} />
+          <AlertsPanel lowStock={lowStock} overdueRentals={overdueRentals} expiring={expiring} />
+        </div>
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">{periodLabel} Transactions</h3>
+          {recent.length === 0 ? (
+            <p className="text-sm text-slate-400 py-4">No transactions recorded {isWeek ? "this week" : "today"} yet.</p>
+          ) : (
+            <div className="divide-y divide-slate-100">
+              {recent.map((t) => (
+                <div key={t.id} className="flex items-center gap-3 py-2.5">
+                  <span className="text-xs font-medium text-slate-500 w-14">{t.type}</span>
+                  {isWeek && <span className="text-xs text-slate-400 tabular-nums w-20">{t.date}</span>}
+                  <span className="flex-1 text-sm text-slate-800 truncate">{t.desc}</span>
+                  <DomainBadge domain={t.domain} />
+                  <span className="text-sm font-semibold tabular-nums w-24 text-right">{fmtMoney(t.total)}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
