@@ -11,7 +11,8 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const target = body.target || 'all'; // 'all' | 'managers' | 'operators'
-    const customMessage = body.custom_message || '';
+    const rawMessage = typeof body.custom_message === 'string' ? body.custom_message : '';
+    const customMessage = rawMessage.replace(/<[^>]*>/g, '').slice(0, 500);
 
     const users = await base44.asServiceRole.entities.User.list();
 
