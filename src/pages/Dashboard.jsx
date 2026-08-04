@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { fmtMoney, isToday, addDays, todayStr } from "@/lib/format";
 import StatCard from "@/components/common/StatCard";
 import RevenueChart from "@/components/dashboard/RevenueChart";
+import ProductPerformanceChart from "@/components/dashboard/ProductPerformanceChart";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import DomainBadge from "@/components/common/DomainBadge";
 import { ShoppingCart, Wheat, Factory, Tractor, Receipt } from "lucide-react";
@@ -104,6 +105,15 @@ export default function Dashboard() {
     ...periodRentals.map((r) => ({ id: `r-${r.id}`, type: "Rental", desc: `${r.tool_name} — ${r.customer_name}`, domain: "rental_tool", total: r.total_charge, date: (r.created_date || "").slice(0, 10) })),
   ].sort((a, b) => (a.date < b.date ? 1 : -1));
 
+  const productPerf = periodSales.reduce((acc, s) => {
+    const key = s.product_name;
+    if (!acc[key]) acc[key] = { product_name: key, revenue: 0, qty: 0 };
+    acc[key].revenue += s.total || 0;
+    acc[key].qty += s.quantity || 0;
+    return acc;
+  }, {});
+  const productPerfArr = Object.values(productPerf);
+
   const periodLabel = isWeek ? "This Week's" : "Today's";
   const netLabel = isWeek ? "Net This Week" : "Net Today";
 
@@ -135,8 +145,9 @@ export default function Dashboard() {
         </div>
         <div className="grid lg:grid-cols-2 gap-6">
           <RevenueChart feedMill={feedMillRev} fishFarm={fishFarmRev} rentals={rentalRev} />
-          <AlertsPanel lowStock={lowStock} overdueRentals={overdueRentals} expiring={expiring} />
+          <ProductPerformanceChart products={productPerfArr} />
         </div>
+        <AlertsPanel lowStock={lowStock} overdueRentals={overdueRentals} expiring={expiring} />
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-5">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">{periodLabel} Transactions</h3>
           {recent.length === 0 ? (

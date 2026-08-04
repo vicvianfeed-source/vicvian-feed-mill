@@ -9,9 +9,9 @@ import AccountSettings from "@/components/AccountSettings";
 import PageTransition from "@/components/PageTransition";
 import PullToRefresh from "@/components/PullToRefresh";
 import {
-  LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
-  Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot, ClipboardList, FileText,
-} from "lucide-react";
+    LayoutDashboard, ShoppingCart, Wheat, Factory, Tractor, PackagePlus,
+    Receipt, Boxes, Package, Tags, BarChart3, ScrollText, Users, LogOut, Menu, X, Bot, ClipboardList, FileText, Contact,
+  } from "lucide-react";
 
 const NAV = [
   { label: "Dashboard", path: "/", icon: LayoutDashboard, roles: ["admin", "manager", "operator"] },
@@ -26,6 +26,7 @@ const NAV = [
   { label: "Pricing", path: "/pricing", icon: Tags, roles: ["admin", "manager"] },
   { label: "Reports", path: "/reports", icon: BarChart3, roles: ["admin", "manager"] },
   { label: "Orders", path: "/orders", icon: ClipboardList, roles: ["admin", "manager"] },
+  { label: "CRM", path: "/crm", icon: Contact, roles: ["admin", "manager"] },
   { label: "Business Plan", path: "/business-plan", icon: FileText, roles: ["admin", "manager"], emails: ["vicvianfeed@gmail.com", "contactarkbridge@gmail.com"] },
   { label: "Audit Log", path: "/audit", icon: ScrollText, roles: ["admin"] },
   { label: "Team", path: "/team", icon: Users, roles: ["admin"] },

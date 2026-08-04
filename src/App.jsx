@@ -25,6 +25,7 @@ import Products from '@/pages/Products';
 import Pricing from '@/pages/Pricing';
 import Reports from '@/pages/Reports';
 import Orders from '@/pages/Orders';
+import CRM from '@/pages/CRM';
 import BusinessPlan from '@/pages/BusinessPlan';
 import AuditLogPage from '@/pages/AuditLogPage';
 import Team from '@/pages/Team';
@@ -77,6 +78,7 @@ const AuthenticatedApp = () => {
           <Route path="/pricing" element={<Pricing />} />
           <Route path="/reports" element={<Reports />} />
           <Route path="/orders" element={<Orders />} />
+          <Route path="/crm" element={<CRM />} />
           <Route path="/business-plan" element={<BusinessPlan />} />
           <Route path="/audit" element={<AuditLogPage />} />
           <Route path="/team" element={<Team />} />
