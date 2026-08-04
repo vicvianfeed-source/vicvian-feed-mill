@@ -84,7 +84,8 @@ export default function Sales() {
     .filter((s) => tab === "all" || s.domain === tab)
     .filter((s) => !search || s.product_name?.toLowerCase().includes(search.toLowerCase()) || s.customer_name?.toLowerCase().includes(search.toLowerCase()));
 
-  const totalRevenue = filtered.filter((s) => s.status !== "void").reduce((sum, s) => sum + s.total, 0);
+  const allSales = sales.filter((s) => s.status !== "void");
+  const totalRevenue = allSales.reduce((sum, s) => sum + s.total, 0);
 
   return (
     <div className="space-y-5">
@@ -117,7 +118,7 @@ export default function Sales() {
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <p className="text-xs text-slate-500 mb-1">Total Sales</p>
-          <p className="text-2xl font-bold text-slate-900">{filtered.length}</p>
+          <p className="text-2xl font-bold text-slate-900">{allSales.length}</p>
         </div>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <p className="text-xs text-slate-500 mb-1">Total Revenue</p>
