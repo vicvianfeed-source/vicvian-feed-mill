@@ -44,7 +44,11 @@ export default function Sales() {
       base44.entities.Product.list("-created_date", 500),
     ]);
     const dateOf = (x) => x.sale_date || new Date(x.created_date).toISOString().slice(0, 10);
-    setSales([...s].sort((a, b) => dateOf(b).localeCompare(dateOf(a))));
+    setSales([...s].sort((a, b) => {
+      const cmp = dateOf(b).localeCompare(dateOf(a));
+      if (cmp !== 0) return cmp;
+      return (b.total || 0) - (a.total || 0);
+    }));
     setProducts(p);
     setLoading(false);
   };
