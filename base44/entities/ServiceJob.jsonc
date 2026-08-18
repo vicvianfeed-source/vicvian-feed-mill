@@ -14,6 +14,14 @@
     "grain_type": {
       "type": "string"
     },
+    "pellet_size": {
+      "type": "string",
+      "enum": [
+        "2mm",
+        "4mm",
+        "6mm"
+      ]
+    },
     "quantity_kg": {
       "type": "number"
     },
@@ -81,23 +89,9 @@
       ]
     },
     "update": {
-      "$or": [
-        {
-          "user_condition": {
-            "role": "admin"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "manager"
-          }
-        },
-        {
-          "user_condition": {
-            "role": "operator"
-          }
-        }
-      ]
+      "user_condition": {
+        "role": "admin"
+      }
     },
     "delete": {
       "user_condition": {
