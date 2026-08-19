@@ -27,6 +27,7 @@ export default function Services() {
   const [deleting, setDeleting] = useState(false);
   const isMobile = useIsMobile();
   const isAdmin = role === "admin";
+  const isOperator = role === "operator";
 
   const load = async () => {
     const [j, p, settings] = await Promise.all([
@@ -117,7 +118,12 @@ export default function Services() {
         <PelletPriceManager onPricesChange={setPelletPrices} />
       )}
 
-      {isMobile ? (
+      {isOperator ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-16 text-slate-400">
+          <p className="text-sm font-medium text-slate-600">Use the "Log Service Job" button to record a service job.</p>
+          <p className="text-xs mt-1">Service job history is only visible to admins and managers.</p>
+        </div>
+      ) : isMobile ? (
         <div className="space-y-3">
           {loading ? (
             <p className="text-center py-8 text-slate-400 text-sm">Loading...</p>
