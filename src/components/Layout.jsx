@@ -55,7 +55,7 @@ export default function Layout() {
   const sidebar = (
     <div className="flex flex-col h-full bg-[#1A1F2E] text-slate-300">
       <div className="px-5 py-6 border-b border-white/10">
-        <h1 className="text-lg font-bold text-white tracking-tight">AgroMill IMS</h1>
+        <h1 className="text-lg font-bold text-white tracking-tight">Vicvian IMS</h1>
         <p className="text-xs text-slate-400 mt-0.5">Feed · Fish · Rentals</p>
       </div>
       <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">

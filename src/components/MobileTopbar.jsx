@@ -14,7 +14,7 @@ export default function MobileTopbar() {
   const location = useLocation();
   const isDeep = location.pathname.endsWith("/new");
   const base = location.pathname.replace(/\/new$/, "");
-  const title = TITLES[base] || TITLES[location.pathname] || "AgroMill";
+  const title = TITLES[base] || TITLES[location.pathname] || "Vicvian";
 
   const goBack = () => {
     if (isDeep) {
@@ -35,7 +35,7 @@ export default function MobileTopbar() {
           <ArrowLeft className="w-5 h-5" />
         </button>
       )}
-      <h1 className="font-bold flex-1 truncate">{isDeep ? `New ${title}` : "AgroMill IMS"}</h1>
+      <h1 className="font-bold flex-1 truncate">{isDeep ? `New ${title}` : "Vicvian IMS"}</h1>
     </div>
   );
 }
