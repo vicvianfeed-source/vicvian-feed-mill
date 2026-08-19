@@ -115,15 +115,17 @@ export default function Sales() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className={`grid ${isOperator ? "grid-cols-1" : "grid-cols-2"} gap-4`}>
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
           <p className="text-xs text-slate-500 mb-1">Total Sales</p>
           <p className="text-2xl font-bold text-slate-900">{allSales.length}</p>
         </div>
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
-          <p className="text-xs text-slate-500 mb-1">Total Revenue</p>
-          <p className="text-2xl font-bold text-emerald-600">{fmtMoney(totalRevenue)}</p>
-        </div>
+        {!isOperator && (
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+            <p className="text-xs text-slate-500 mb-1">Total Revenue</p>
+            <p className="text-2xl font-bold text-emerald-600">{fmtMoney(totalRevenue)}</p>
+          </div>
+        )}
       </div>
 
       {/* List */}
