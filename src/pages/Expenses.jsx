@@ -35,6 +35,7 @@ export default function Expenses() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const isOperator = role === "operator";
   const isMobile = useIsMobile();
   const { resolveName } = useUserNameMap();
   const recorderName = user.full_name || user.email;
@@ -82,6 +83,14 @@ export default function Expenses() {
         </Button>
       </div>
 
+      {isOperator ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-16 text-slate-400">
+          <Receipt className="w-10 h-10 mb-3 text-slate-300" />
+          <p className="text-sm font-medium text-slate-600">Use the "Record Expense" button to log an expense.</p>
+          <p className="text-xs mt-1">Expense history is only visible to admins and managers.</p>
+        </div>
+      ) : (
+        <>
       {/* Search */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -172,6 +181,8 @@ export default function Expenses() {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
 
       <Dialog open={open} onOpenChange={(v) => !v && closeForm()}>

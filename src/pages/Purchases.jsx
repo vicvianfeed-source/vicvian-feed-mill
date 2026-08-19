@@ -24,6 +24,7 @@ export default function Purchases() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const isAdmin = role === "admin";
+  const isOperator = role === "operator";
   const { resolveName } = useUserNameMap();
   const recorderName = user.full_name || user.email;
 
@@ -96,48 +97,55 @@ export default function Purchases() {
         </div>
         <Button onClick={() => setOpen(true)}><Plus className="w-4 h-4 mr-1" /> Record Purchase</Button>
       </div>
-      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Date</TableHead>
-              <TableHead>Item</TableHead>
-              <TableHead>Supplier</TableHead>
-              <TableHead className="text-right">Qty</TableHead>
-              <TableHead className="text-right">Unit Cost</TableHead>
-              <TableHead className="text-right">Total</TableHead>
-              <TableHead>Recorded by</TableHead>
-              {isAdmin && <TableHead className="w-10"></TableHead>}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
-            ) : purchases.length === 0 ? (
-              <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">No purchases recorded yet.</TableCell></TableRow>
-            ) : (
-              purchases.map((p, i) => (
-                <TableRow key={p.id} className={i % 2 ? "bg-slate-50/50" : ""}>
-                  <TableCell className="text-slate-500 text-xs">{p.purchase_date}</TableCell>
-                  <TableCell className="font-medium">{p.product_name}</TableCell>
-                  <TableCell>{p.supplier}</TableCell>
-                  <TableCell className="text-right tabular-nums">{p.quantity} {p.unit || ""}</TableCell>
-                  <TableCell className="text-right tabular-nums">{fmtMoney(p.unit_cost)}</TableCell>
-                  <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(p.total_cost)}</TableCell>
-                  <TableCell className="text-xs text-slate-500">{resolveName(p.recorded_by)}</TableCell>
-                  {isAdmin && (
-                    <TableCell>
-                      <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(p)}>
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TableCell>
-                  )}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      {isOperator ? (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm flex flex-col items-center justify-center py-16 text-slate-400">
+          <p className="text-sm font-medium text-slate-600">Use the "Record Purchase" button to log a purchase.</p>
+          <p className="text-xs mt-1">Purchase history is only visible to admins and managers.</p>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Date</TableHead>
+                <TableHead>Item</TableHead>
+                <TableHead>Supplier</TableHead>
+                <TableHead className="text-right">Qty</TableHead>
+                <TableHead className="text-right">Unit Cost</TableHead>
+                <TableHead className="text-right">Total</TableHead>
+                <TableHead>Recorded by</TableHead>
+                {isAdmin && <TableHead className="w-10"></TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">Loading...</TableCell></TableRow>
+              ) : purchases.length === 0 ? (
+                <TableRow><TableCell colSpan={isAdmin ? 8 : 7} className="text-center py-8 text-slate-400">No purchases recorded yet.</TableCell></TableRow>
+              ) : (
+                purchases.map((p, i) => (
+                  <TableRow key={p.id} className={i % 2 ? "bg-slate-50/50" : ""}>
+                    <TableCell className="text-slate-500 text-xs">{p.purchase_date}</TableCell>
+                    <TableCell className="font-medium">{p.product_name}</TableCell>
+                    <TableCell>{p.supplier}</TableCell>
+                    <TableCell className="text-right tabular-nums">{p.quantity} {p.unit || ""}</TableCell>
+                    <TableCell className="text-right tabular-nums">{fmtMoney(p.unit_cost)}</TableCell>
+                    <TableCell className="text-right tabular-nums font-semibold">{fmtMoney(p.total_cost)}</TableCell>
+                    <TableCell className="text-xs text-slate-500">{resolveName(p.recorded_by)}</TableCell>
+                    {isAdmin && (
+                      <TableCell>
+                        <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-rose-600" onClick={() => setDeleteTarget(p)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    )}
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader><DialogTitle>Record Purchase</DialogTitle></DialogHeader>
