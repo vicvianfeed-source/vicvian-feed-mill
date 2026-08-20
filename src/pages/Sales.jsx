@@ -40,7 +40,7 @@ export default function Sales() {
 
   const load = async () => {
     const [s, p] = await Promise.all([
-      base44.entities.Sale.list("-created_date", 100),
+      base44.entities.Sale.list("-created_date", 10000),
       base44.entities.Product.list("-created_date", 500),
     ]);
     const dateOf = (x) => x.sale_date || new Date(x.created_date).toISOString().slice(0, 10);
